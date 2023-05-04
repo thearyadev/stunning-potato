@@ -1,5 +1,6 @@
 import psycopg2
 from pathlib import Path
+import logging
 
 
 class DatabaseAccess:
@@ -17,11 +18,14 @@ class DatabaseAccess:
             user=self.db_user,
             password=self.db_password,
         )
+        logging.info("Connected to database")
 
     def initialize(self, sql_path: Path):
         with open(sql_path, "r") as sql_file, self.connection.cursor() as cursor:
             cursor.execute(sql_file.read())
             self.connection.commit()
+        logging.info("Initialized database")
+
 
 if __name__ == "__main__":
     db_access = DatabaseAccess(
