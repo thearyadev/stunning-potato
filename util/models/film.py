@@ -49,6 +49,7 @@ class Film(BaseModel):
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+        use_enum_values = True
         json_encoders = {
             timedelta: lambda v: str(v),
             date: lambda v: v.isoformat(),
