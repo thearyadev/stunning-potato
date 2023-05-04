@@ -15,7 +15,6 @@ class RatingIn(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
 
-
 class Rating(BaseModel):
     uuid: UUID = Field(alias="uuid")
 

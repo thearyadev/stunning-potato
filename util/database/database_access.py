@@ -8,11 +8,13 @@ from util.models.film import FilmIn, Film
 from util.models.indexed import IndexedIn, Indexed
 from util.models.queue import QueueIn, Queue
 from util.models.rating import RatingIn, Rating
+from util.models.indexed import IndexedIn, Indexed
 from uuid import UUID
 
 
 class DatabaseAccess:
     """Connection to PostgreSQL database tools"""
+
     def __init__(self, db_name, db_user, db_password, db_host, db_port):
         self.db_name = db_name
         self.db_user = db_user
@@ -110,7 +112,7 @@ class DatabaseAccess:
             rating (RatingIn): Rating in object; no uuid; no average
 
         Returns:
-            Rating: Rating out, with uuid and average. Average will be none. 
+            Rating: Rating out, with uuid and average. Average will be none.
         """
         with self.connection.cursor() as cursor:
             cursor.execute(
@@ -125,6 +127,7 @@ class DatabaseAccess:
                     rating.rearview,
                 ),
             )
+            # contains a tuple of uuid and average
             raw_data_queried: tuple[str] = cursor.fetchone()
             rating_inserted: Rating = Rating(
                 uuid=raw_data_queried[0], average=raw_data_queried[1], **rating.dict()
@@ -134,6 +137,14 @@ class DatabaseAccess:
         return rating_inserted
 
     def get_rating(self, uuid: UUID) -> Rating | None:
+        """Gets a rating record given the ratings uuid
+
+        Args:
+            uuid (UUID): ratings uuid
+
+        Returns:
+            Rating | None: returns none if no rating is found
+        """
         with self.connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute("SELECT * FROM rating WHERE uuid = %s", str(uuid))
             if (query_result := cursor.fetchone()) is not None:
@@ -145,6 +156,14 @@ class DatabaseAccess:
         return rating
 
     def update_rating(self, rating: Rating) -> Rating:
+        """Updates a rating record in the database
+
+        Args:
+            rating (Rating): Rating object with uuid and average (average is ignored)
+
+        Returns:
+            Rating: Rating object with uuid and average (av is ignored)
+        """
         with self.connection.cursor() as cursor:
             cursor.execute(
                 "UPDATE rating SET story = %s, positions = %s, pussy = %s, shots = %s, boobs = %s, face = %s, rearview = %s WHERE uuid = %s",
@@ -156,9 +175,29 @@ class DatabaseAccess:
                     rating.boobs,
                     rating.face,
                     rating.rearview,
-                    str(rating.uuid)
+                    str(rating.uuid),
                 ),
             )
             self.connection.commit()
         logging.info(f"Updated Rating {rating}")
         return rating
+
+    ## INDEXED
+    def insert_indexed(self, indexed: IndexedIn) -> Indexed:
+        """Inserts an indexed entry
+
+        Args:
+            indexed (IndexedIn): indexed in object
+
+        Returns:
+            Indexed: indexed out, includes uuid
+        """
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO indexed (title, actresses, thumbnail, url) VALUES (%s, %s, %s, %s) RETURNING uuid",
+                (indexed.title, indexed.actresses, indexed.thumbnail, indexed.url),
+            )
+            logging.info(f"Inserted indexed {indexed}")
+            indexed_inserted: Indexed = Indexed(uuid=cursor.fetchone()[0], **indexed.dict())
+            self.connection.commit()
+            return indexed_inserted
