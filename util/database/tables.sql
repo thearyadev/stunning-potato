@@ -59,6 +59,10 @@ CREATE TABLE IF NOT EXISTS film (
   state film_state NOT NULL,
   thumbnail bytea NOT NULL,
   poster bytea NOT NULL,
+  download_progress integer NOT NULL CHECK (
+    download_progress BETWEEN 0
+    AND 100
+  ) 
 );
 
 -- Junction table for film-actress-rating
