@@ -1,6 +1,11 @@
 import psycopg2
 from pathlib import Path
 import logging
+from util.models.film_actress_rating import FilmActressRating
+from util.models.actress import ActressIn, Actress
+from util.models.film import FilmIn, Film
+from util.models.indexed import IndexedIn, Indexed
+from util.models.queue import QueueIn, Queue
 
 
 class DatabaseAccess:
@@ -26,9 +31,13 @@ class DatabaseAccess:
             self.connection.commit()
         logging.info("Initialized database")
 
-
-if __name__ == "__main__":
-    db_access = DatabaseAccess(
-        "lewdlocale", "lewdlocale", "lewdlocale", "localhost", "5432"
-    )
-    db_access.initialize(Path("util/database/tables.sql"))
+    ## ACTRESS
+    def insert_actress(self, actress: ActressIn) -> Actress:
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO actress (name_) VALUES (%s) RETURN uuid",
+                (actress.name_),
+            )
+            actress_inserted: Actress = Actress(uuid=cursor.fetchone()[0], name_=actress.name_)
+            self.connection.commit()
+        logging.info(f"Inserted actress {actress_inserted}")

@@ -1,6 +1,11 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TYPE film_state AS ENUM ('DOWNLOADING', 'IN QUEUE', 'COMPLETE');
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'film_state') THEN 
+        CREATE TYPE film_state AS ENUM ('DOWNLOADING', 'IN QUEUE', 'COMPLETE'); 
+    END IF; 
+END $$;
 
 
 
@@ -99,7 +104,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger on rating table
-CREATE TRIGGER update_rating_average_trigger
+CREATE OR REPLACE TRIGGER update_rating_average_trigger
 AFTER INSERT OR UPDATE OF story, positions, pussy, shots, boobs, rearview ON rating
 FOR EACH ROW
 EXECUTE FUNCTION update_rating_average();

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from uuid import UUID
 
+
 # junction table
 class FilmActressRating(BaseModel):
     uuid: UUID = Field(alias="uuid")
