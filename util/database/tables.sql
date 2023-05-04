@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS film (
   filename text NOT NULL,
   watched boolean NOT NULL,
   state film_state NOT NULL,
-  thumbnail bytea,
-  poster bytea
+  thumbnail bytea NOT NULL,
+  poster bytea NOT NULL,
 );
 
 -- Junction table for film-actress-rating
