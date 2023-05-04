@@ -2,7 +2,7 @@ from datetime import date, time, datetime, timedelta
 from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class FilmStateEnum(str, Enum):
@@ -55,3 +55,8 @@ class Film(BaseModel):
             date: lambda v: v.isoformat(),
             bytes: lambda _: None,
         }
+    @validator("thumbnail", "poster", pre=True)
+    def convert_memoryview(cls, value):
+        if isinstance(value, memoryview):
+            return bytes(value)
+        return value

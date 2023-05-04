@@ -201,3 +201,29 @@ class DatabaseAccess:
             indexed_inserted: Indexed = Indexed(uuid=cursor.fetchone()[0], **indexed.dict())
             self.connection.commit()
             return indexed_inserted
+
+    def get_indexed(self, uuid: UUID) -> Indexed:
+        """Given a indexed uuid, returns the indexed object
+
+        Args:
+            uuid (UUID): indexed item uuid
+
+        Returns:
+            Indexed: indexed item, uuid included
+        """
+        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                "SELECT * FROM indexed WHERE uuid = %s",
+                (str(uuid),),
+            )
+            if (query_result := cursor.fetchone()) is not None:
+                indexed: Indexed = Indexed(**query_result)
+            else:
+                indexed: None = None
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved indexed {indexed}")
+        return indexed
+    
+    def get_page_indexed(self) -> list[Indexed]:
+        """This method will be used to get a page of indexed items. TBI"""
+        ...

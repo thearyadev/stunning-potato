@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from uuid import UUID
 
 
@@ -11,7 +11,7 @@ class IndexedIn(BaseModel):
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
-
+        
 
 class Indexed(BaseModel):
     uuid: UUID = Field(alias="uuid")
@@ -23,3 +23,9 @@ class Indexed(BaseModel):
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
+
+    @validator("thumbnail", pre=True)
+    def convert_memoryview(cls, value):
+        if isinstance(value, memoryview):
+            return bytes(value)
+        return value
