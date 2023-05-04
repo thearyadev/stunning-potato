@@ -3,14 +3,13 @@ from uuid import UUID
 
 
 class RatingIn(BaseModel):
-    average: float = Field(..., ge=0, le=10, alias="average")
-    story: int = Field(..., ge=0, le=10, alias="story")
-    positions: int = Field(..., ge=0, le=10, alias="positions")
-    pussy: int = Field(..., ge=0, le=10, alias="pussy")
-    shots: int = Field(..., ge=0, le=10, alias="shots")
-    boobs: int = Field(..., ge=0, le=10, alias="boobs")
-    face: int = Field(..., ge=0, le=10, alias="face")
-    rearview: int = Field(..., ge=0, le=10, alias="rearview")
+    story: int = Field(ge=0, le=10, alias="story")
+    positions: int = Field(ge=0, le=10, alias="positions")
+    pussy: int = Field(ge=0, le=10, alias="pussy")
+    shots: int = Field(ge=0, le=10, alias="shots")
+    boobs: int = Field(ge=0, le=10, alias="boobs")
+    face: int = Field(ge=0, le=10, alias="face")
+    rearview: int = Field(ge=0, le=10, alias="rearview")
 
     class Config:
         orm_mode = True
@@ -18,16 +17,16 @@ class RatingIn(BaseModel):
 
 
 class Rating(BaseModel):
-    uuid: UUID = Field(alias=UUID)
+    uuid: UUID = Field(alias="uuid")
 
-    average: float = Field(..., ge=0, le=10, alias="average")
-    story: int = Field(..., ge=0, le=10, alias="story")
-    positions: int = Field(..., ge=0, le=10, alias="positions")
-    pussy: int = Field(..., ge=0, le=10, alias="pussy")
-    shots: int = Field(..., ge=0, le=10, alias="shots")
-    boobs: int = Field(..., ge=0, le=10, alias="boobs")
-    face: int = Field(..., ge=0, le=10, alias="face")
-    rearview: int = Field(..., ge=0, le=10, alias="rearview")
+    average: float | None = Field(ge=0, le=10, alias="average")
+    story: int = Field(ge=0, le=10, alias="story")
+    positions: int = Field(ge=0, le=10, alias="positions")
+    pussy: int = Field(ge=0, le=10, alias="pussy")
+    shots: int = Field(ge=0, le=10, alias="shots")
+    boobs: int = Field(ge=0, le=10, alias="boobs")
+    face: int = Field(ge=0, le=10, alias="face")
+    rearview: int = Field(ge=0, le=10, alias="rearview")
 
     class Config:
         orm_mode = True
