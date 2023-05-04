@@ -12,6 +12,7 @@ from uuid import UUID
 
 
 class DatabaseAccess:
+    """Connection to PostgreSQL database tools"""
     def __init__(self, db_name, db_user, db_password, db_host, db_port):
         self.db_name = db_name
         self.db_user = db_user
@@ -19,6 +20,7 @@ class DatabaseAccess:
         self.db_host = db_host
         self.db_port = db_port
 
+        # Create connection
         self.connection = psycopg2.connect(
             host=self.db_host,
             port=self.db_port,
@@ -29,6 +31,11 @@ class DatabaseAccess:
         logging.info("Connected to database")
 
     def initialize(self, sql_path: Path):
+        """Creates all the tables as defined in a .sql file
+
+        Args:
+            sql_path (Path): path to sql file
+        """
         with open(sql_path, "r") as sql_file, self.connection.cursor() as cursor:
             cursor.execute(sql_file.read())
             self.connection.commit()
@@ -36,11 +43,20 @@ class DatabaseAccess:
 
     ## ACTRESS
     def insert_actress(self, actress: ActressIn) -> Actress:
+        """Adds an actress to the database
+
+        Args:
+            actress (ActressIn): Actress in (no uuid)
+
+        Returns:
+            Actress: Actress out (with uuid)
+        """
         with self.connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO actress (name_) VALUES (%s) RETURNING uuid",
                 (actress.name_,),
             )
+            # returns uuid, capture and recreate object
             actress_inserted: Actress = Actress(
                 uuid=cursor.fetchone()[0], name_=actress.name_
             )
@@ -48,6 +64,14 @@ class DatabaseAccess:
         logging.info(f"Inserted actress {actress_inserted}")
 
     def get_actress(self, uuid: UUID) -> Actress | None:
+        """Gets an actress by the uuid
+
+        Args:
+            uuid (UUID):  uuid of the actress in the database
+
+        Returns:
+            Actress | None: Returns none if no actress is found
+        """
         with self.connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT uuid, name_ FROM actress WHERE uuid = %s",
@@ -62,6 +86,11 @@ class DatabaseAccess:
         return actress
 
     def get_all_actresses(self) -> list[Actress]:
+        """Gets all actresses from the database
+
+        Returns:
+            list[Actress]: list of actress out objects
+        """
         with self.connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT uuid, name_ FROM actress",
@@ -75,6 +104,14 @@ class DatabaseAccess:
     ## RATING
 
     def insert_rating(self, rating: RatingIn) -> Rating:
+        """Insert a rating to the database
+
+        Args:
+            rating (RatingIn): Rating in object; no uuid; no average
+
+        Returns:
+            Rating: Rating out, with uuid and average. Average will be none. 
+        """
         with self.connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO rating ( story, positions, pussy, shots, boobs, face, rearview) VALUES ( %s, %s, %s, %s, %s, %s, %s) RETURNING uuid, average",
