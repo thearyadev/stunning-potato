@@ -95,3 +95,7 @@ class DatabaseAccess:
             self.connection.commit()
         logging.info(f"Inserted rating {rating_inserted}")
         return rating_inserted
+
+    def get_rating(self, uuid: UUID) -> Rating:
+        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute("SELECT * FROM rating WHERE uuid = %s", str(uuid))
