@@ -57,6 +57,7 @@ class DatabaseAccess:
                 actress: Actress = Actress(**query_result)
             else:
                 actress: None = None
+                logging.warning("Attemped to access record that does not exist.")
         logging.info(f"Retrieved actress {actress}")
         return actress
 
@@ -78,7 +79,6 @@ class DatabaseAccess:
             cursor.execute(
                 "INSERT INTO rating ( story, positions, pussy, shots, boobs, face, rearview) VALUES ( %s, %s, %s, %s, %s, %s, %s) RETURNING uuid, average",
                 (
-
                     rating.story,
                     rating.positions,
                     rating.pussy,
@@ -96,6 +96,32 @@ class DatabaseAccess:
         logging.info(f"Inserted rating {rating_inserted}")
         return rating_inserted
 
-    def get_rating(self, uuid: UUID) -> Rating:
+    def get_rating(self, uuid: UUID) -> Rating | None:
         with self.connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute("SELECT * FROM rating WHERE uuid = %s", str(uuid))
+            if (query_result := cursor.fetchone()) is not None:
+                rating: Rating = Rating(**query_result)
+            else:
+                rating: None = None
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved Rating {rating}")
+        return rating
+
+    def update_rating(self, rating: Rating) -> Rating:
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE rating SET story = %s, positions = %s, pussy = %s, shots = %s, boobs = %s, face = %s, rearview = %s WHERE uuid = %s",
+                (
+                    rating.story,
+                    rating.positions,
+                    rating.pussy,
+                    rating.shots,
+                    rating.boobs,
+                    rating.face,
+                    rating.rearview,
+                    str(rating.uuid)
+                ),
+            )
+            self.connection.commit()
+        logging.info(f"Updated Rating {rating}")
+        return rating
