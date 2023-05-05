@@ -6,7 +6,6 @@ from uuid import UUID
 from rich.logging import RichHandler
 
 from util.database.database_access import DatabaseAccess
-from util.models.actress import ActressIn, Actress
 from util.models.film import Film, FilmIn, FilmStateEnum, FilmNoBytes, FilmNoBytesWithAverage
 from util.models.indexed import Indexed, IndexedIn
 from util.models.queue import Queue, QueueIn
