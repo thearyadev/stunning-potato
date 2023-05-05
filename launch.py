@@ -11,6 +11,7 @@ from util.models.indexed import Indexed, IndexedIn
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
 import time
+
 logging.basicConfig(
     level=logging.CRITICAL,
     format="\[%(module)s.%(funcName)s] %(message)s",
@@ -20,18 +21,18 @@ logging.basicConfig(
 
 db = DatabaseAccess("lewdlocale", "lewdlocale", "lewdlocale", "localhost", "5432")
 db.initialize(Path("util/database/tables.sql"))
-db.drop()
-db.initialize(Path("util/database/tables.sql"))
-db.populate_demo_data()
+# db.drop()
+# db.initialize(Path("util/database/tables.sql"))
+# db.populate_demo_data()
 s= time.perf_counter()
 data: list[FilmNoBytesWithAverage] = db.get_all_films_no_bytes_with_rating_average()
 
-e = time.perf_counter()
+
 
 for i in data:
-    print(i.average)
+    db.get_rating(i.rating)
 
-
+e = time.perf_counter()
 print(f"Time: {e-s}")
 """
 

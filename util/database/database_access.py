@@ -8,9 +8,7 @@ from psycopg2 import pool
 from psycopg2.extras import DictCursor
 from psycopg2.extras import UUID_adapter
 from psycopg2.extras import register_uuid
-from util.models.actress import Actress, ActressIn
 from util.models.film import Film, FilmIn, FilmNoBytes, FilmStateEnum, FilmNoBytesWithAverage
-from util.models.film_actress_rating import FilmActressRating, FilmActressRatingIn
 from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
@@ -63,7 +61,7 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
         logging.info("Initialized database")
 
-    def get_all_actresses(self) -> list[Actress]:
+    def get_all_actresses(self) -> list[str]:
         """Gets all actresses from the database
 
         Returns:
