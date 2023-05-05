@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, validator
 from uuid import UUID
+
+from pydantic import BaseModel, Field, validator
 
 
 class IndexedIn(BaseModel):
@@ -11,7 +12,7 @@ class IndexedIn(BaseModel):
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
-        
+
 
 class Indexed(BaseModel):
     uuid: UUID = Field(alias="uuid")
@@ -29,6 +30,7 @@ class Indexed(BaseModel):
         if isinstance(value, memoryview):
             return bytes(value)
         return value
+
 
 class IndexedNoBytes(BaseModel):
     uuid: UUID = Field(alias="uuid")

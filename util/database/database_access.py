@@ -1,39 +1,40 @@
-import psycopg2
-from psycopg2.extras import DictCursor
-from psycopg2 import pool
-from pathlib import Path
 import logging
-from util.models.film_actress_rating import FilmActressRating
-from util.models.actress import ActressIn, Actress
-from util.models.film import FilmIn, Film, FilmNoBytes
-from util.models.indexed import IndexedIn, Indexed
-from util.models.queue import QueueIn, Queue
-from util.models.rating import RatingIn, Rating
-from util.models.indexed import IndexedIn, Indexed, IndexedNoBytes
+import random
+from pathlib import Path
 from uuid import UUID
+
+import psycopg2
+from psycopg2 import pool
+from psycopg2.extras import DictCursor
+
+from util.models.actress import Actress, ActressIn
+from util.models.film import Film, FilmIn, FilmNoBytes
+from util.models.film_actress_rating import FilmActressRating, FilmActressRatingIn
+from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
+from util.models.queue import Queue, QueueIn
+from util.models.rating import Rating, RatingIn
 
 
 class DatabaseAccess:
     """Connection to PostgreSQL database tools"""
 
-    def __init__(self, db_name, db_user, db_password, db_host, db_port):
+    def __init__(
+        self,
+        db_name: str,
+        db_user: str,
+        db_password: str,
+        db_host: str,
+        db_port: str,
+        max_connections: int = 5,
+        min_connections: int = 1,
+    ):
         self.db_name = db_name
         self.db_user = db_user
         self.db_password = db_password
         self.db_host = db_host
         self.db_port = db_port
-        self.min_connections = 1
-        self.max_connections = 5
-
-        # Create connection
-        # self.connection = psycopg2.connect(
-        #     host=self.db_host,
-        #     port=self.db_port,
-        #     dbname=self.db_name,
-        #     user=self.db_user,
-        #     password=self.db_password,
-        # )
-
+        self.min_connections = min_connections
+        self.max_connections = max_connections
 
         self.connection_pool = pool.ThreadedConnectionPool(
             host=self.db_host,
@@ -304,14 +305,24 @@ class DatabaseAccess:
         with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO film (title, duration, date_added, filename, watched, state, thumbnail, poster, download_progress) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING uuid",
-                (film.title, film.duration, film.date_added, film.filename, film.watched, film.state, film.thumbnail, film.poster, film.download_progress),
+                (
+                    film.title,
+                    film.duration,
+                    film.date_added,
+                    film.filename,
+                    film.watched,
+                    film.state,
+                    film.thumbnail,
+                    film.poster,
+                    film.download_progress,
+                ),
             )
             film_inserted = Film(uuid=cursor.fetchone()[0], **film.dict())
             connection.commit()
         logging.info(f"Inserted film {film_inserted}")
         self.connection_pool.putconn(connection)
         return film_inserted
-    
+
     def get_film(self, uuid: UUID) -> Film | None:
         """Gets a film from the database
 
@@ -335,7 +346,7 @@ class DatabaseAccess:
         logging.info(f"Retrieved film {film}")
         self.connection_pool.putconn(connection)
         return film
-    
+
     def get_film_no_bytes(self, uuid: UUID) -> FilmNoBytes | None:
         """Gets a film from the database without the bytes
 
@@ -359,7 +370,7 @@ class DatabaseAccess:
         logging.info(f"Retrieved film {film}")
         self.connection_pool.putconn(connection)
         return film
-    
+
     def get_film_thumbnail(self, uuid: UUID) -> bytes:
         """gets the thumbnail for a film
 
@@ -383,7 +394,7 @@ class DatabaseAccess:
         logging.info(f"Retrieved film {uuid} thumbnail")
         self.connection_pool.putconn(connection)
         return thumbnail_bytes
-    
+
     def get_film_poster(self, uuid: UUID) -> bytes:
         """gets poster for a film
 
@@ -407,7 +418,7 @@ class DatabaseAccess:
         logging.info(f"Retrieved film {uuid} thumbnail")
         self.connection_pool.putconn(connection)
         return poster_bytes
-    
+
     ## QUEUE
 
     def insert_queue(self, queue: QueueIn) -> Queue:
@@ -428,9 +439,9 @@ class DatabaseAccess:
             queue_inserted = Queue(uuid=cursor.fetchone()[0], **queue.dict())
             connection.commit()
         logging.info(f"Inserted queue {queue_inserted}")
-        connection = self.connection_pool.getconn()
+        connection = self.connection_pool.putconn()
         return queue_inserted
-    
+
     def get_and_pop_queue(self) -> Queue | None:
         """Gets and pops a queue item from the database
 
@@ -455,11 +466,37 @@ class DatabaseAccess:
         logging.info(f"Retrieved queue {queue}")
         self.connection_pool.putconn(connection)
         return queue
-    
 
     ## FILM_ACTRESS_RATING
-    # --
-    
+    def insert_film_actress_rating(
+        self, film_actress_rating: FilmActressRating
+    ) -> FilmActressRating:
+        """Inserts a film actress rating into the database
+
+        Args:
+            film_actress_rating (FilmActressRatingIn): film actress rating object
+
+        Returns:
+            FilmActressRating: film actress rating object. Includes uuid
+        """
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO film_actress_rating (film_uuid, actress_uuid, rating_uuid) VALUES (%s, %s, %s) RETURNING uuid",
+                (
+                    str(film_actress_rating.film_uuid),
+                    str(film_actress_rating.actress_uuid),
+                    str(film_actress_rating.rating_uuid),
+                ),
+            )
+            film_actress_rating_inserted = FilmActressRating(
+                uuid=cursor.fetchone()[0], **film_actress_rating.dict()
+            )
+            connection.commit()
+        logging.info(f"Inserted film actress rating {film_actress_rating_inserted}")
+        connection = self.connection_pool.putconn()
+        return film_actress_rating_inserted
+
     def drop(self):
         """Drops all tables in the database"""
         connection = self.connection_pool.getconn()
@@ -489,18 +526,10 @@ class DatabaseAccess:
             cursor.execute(
                 "DROP TRIGGER IF EXISTS update_rating_average_trigger ON rating;"
             )
-            cursor.execute(
-                "DROP FUNCTION IF EXISTS update_rating_average();"
-            )
-            cursor.execute(
-                "DROP EXTENSION IF EXISTS \"uuid-ossp\" CASCADE;"
-            )
-            cursor.execute(
-                "DROP TYPE IF EXISTS film_state"
-            )
-            cursor.execute(
-                "DROP TABLE IF EXISTS indexed CASCADE;"
-            )
+            cursor.execute("DROP FUNCTION IF EXISTS update_rating_average();")
+            cursor.execute('DROP EXTENSION IF EXISTS "uuid-ossp" CASCADE;')
+            cursor.execute("DROP TYPE IF EXISTS film_state")
+            cursor.execute("DROP TABLE IF EXISTS indexed CASCADE;")
             if input("ENTER Y TO RESET DATABASE: ") == "y":
                 logging.warning("DROPPING DATABASE")
                 connection.commit()
@@ -508,6 +537,34 @@ class DatabaseAccess:
                 logging.warning("NOT DROPPING DATABASE")
                 connection.rollback()
         self.connection_pool.putconn(connection)
-    
+
     def populate_demo_data(self):
-        ...
+        list_of_porn_actresses = [
+            "Scarlet Skies",
+            "Aria Banks",
+            "Lily Larimar",
+            "Lacy Lennon",
+            "Holly Molly",
+            "Sharon White",
+            "Eliza Ibbarra",
+            "Kenna James",
+            "Maya Woulfe",
+        ]
+        actresses = []
+        for actress in list_of_porn_actresses:
+            actresses.append(self.insert_actress(ActressIn(name=actress)))
+        ratings = []
+        for _ in range(10):
+            ratings.append(
+                self.insert_rating(
+                    RatingIn(
+                        story=random.randint(0, 10),
+                        positions=random.randint(0, 10),
+                        pussy=random.randint(0, 10),
+                        shots=random.randint(0, 10),
+                        boobs=random.randint(0, 10),
+                        face=random.randint(0, 10),
+                        rearview=random.randint(0, 10),
+                    )
+                )
+            )

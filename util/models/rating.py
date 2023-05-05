@@ -1,5 +1,6 @@
-from pydantic import BaseModel, validator, Field
 from uuid import UUID
+
+from pydantic import BaseModel, Field, validator
 
 
 class RatingIn(BaseModel):
@@ -14,6 +15,7 @@ class RatingIn(BaseModel):
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
+
 
 class Rating(BaseModel):
     uuid: UUID = Field(alias="uuid")

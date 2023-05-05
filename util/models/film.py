@@ -1,4 +1,4 @@
-from datetime import date, time, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from enum import Enum
 from uuid import UUID
 
@@ -55,11 +55,13 @@ class Film(BaseModel):
             date: lambda v: v.isoformat(),
             bytes: lambda _: None,
         }
+
     @validator("thumbnail", "poster", pre=True)
     def convert_memoryview(cls, value):
         if isinstance(value, memoryview):
             return bytes(value)
         return value
+
 
 class FilmNoBytes(BaseModel):
     uuid: UUID = Field(alias="uuid")
