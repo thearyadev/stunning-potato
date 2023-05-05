@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2.extras import DictCursor
+from psycopg2 import pool
 from pathlib import Path
 import logging
 from util.models.film_actress_rating import FilmActressRating
@@ -8,7 +9,7 @@ from util.models.film import FilmIn, Film, FilmNoBytes
 from util.models.indexed import IndexedIn, Indexed
 from util.models.queue import QueueIn, Queue
 from util.models.rating import RatingIn, Rating
-from util.models.indexed import IndexedIn, Indexed
+from util.models.indexed import IndexedIn, Indexed, IndexedNoBytes
 from uuid import UUID
 
 
@@ -21,15 +22,29 @@ class DatabaseAccess:
         self.db_password = db_password
         self.db_host = db_host
         self.db_port = db_port
+        self.min_connections = 1
+        self.max_connections = 5
 
         # Create connection
-        self.connection = psycopg2.connect(
+        # self.connection = psycopg2.connect(
+        #     host=self.db_host,
+        #     port=self.db_port,
+        #     dbname=self.db_name,
+        #     user=self.db_user,
+        #     password=self.db_password,
+        # )
+
+
+        self.connection_pool = pool.ThreadedConnectionPool(
             host=self.db_host,
             port=self.db_port,
             dbname=self.db_name,
             user=self.db_user,
             password=self.db_password,
+            minconn=self.min_connections,
+            maxconn=self.max_connections,
         )
+
         logging.info("Connected to database")
 
     def initialize(self, sql_path: Path):
@@ -38,9 +53,11 @@ class DatabaseAccess:
         Args:
             sql_path (Path): path to sql file
         """
-        with open(sql_path, "r") as sql_file, self.connection.cursor() as cursor:
+        connection = self.connection_pool.getconn()
+        with open(sql_path, "r") as sql_file, connection.cursor() as cursor:
             cursor.execute(sql_file.read())
-            self.connection.commit()
+            connection.commit()
+        self.connection_pool.putconn(connection)
         logging.info("Initialized database")
 
     ## ACTRESS
@@ -53,7 +70,9 @@ class DatabaseAccess:
         Returns:
             Actress: Actress out (with uuid)
         """
-        with self.connection.cursor() as cursor:
+        connection = self.connection_pool.getconn()
+
+        with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO actress (name_) VALUES (%s) RETURNING uuid",
                 (actress.name_,),
@@ -62,7 +81,8 @@ class DatabaseAccess:
             actress_inserted: Actress = Actress(
                 uuid=cursor.fetchone()[0], name_=actress.name_
             )
-            self.connection.commit()
+            connection.commit()
+        self.connection_pool.putconn(connection)
         logging.info(f"Inserted actress {actress_inserted}")
 
     def get_actress(self, uuid: UUID) -> Actress | None:
@@ -74,7 +94,9 @@ class DatabaseAccess:
         Returns:
             Actress | None: Returns none if no actress is found
         """
-        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+        connection = self.connection_pool.getconn()
+
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT uuid, name_ FROM actress WHERE uuid = %s",
                 (str(uuid),),
@@ -85,6 +107,7 @@ class DatabaseAccess:
                 actress: None = None
                 logging.warning("Attemped to access record that does not exist.")
         logging.info(f"Retrieved actress {actress}")
+        self.connection_pool.putconn(connection)
         return actress
 
     def get_all_actresses(self) -> list[Actress]:
@@ -93,7 +116,8 @@ class DatabaseAccess:
         Returns:
             list[Actress]: list of actress out objects
         """
-        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT uuid, name_ FROM actress",
             )
@@ -101,6 +125,7 @@ class DatabaseAccess:
                 Actress(**actress) for actress in cursor.fetchall()
             ]
         logging.info(f"Retrieved {len(actresses)} actresses")
+        self.connection_pool.putconn(connection)
         return actresses
 
     ## RATING
@@ -114,7 +139,8 @@ class DatabaseAccess:
         Returns:
             Rating: Rating out, with uuid and average. Average will be none.
         """
-        with self.connection.cursor() as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO rating ( story, positions, pussy, shots, boobs, face, rearview) VALUES ( %s, %s, %s, %s, %s, %s, %s) RETURNING uuid, average",
                 (
@@ -132,7 +158,9 @@ class DatabaseAccess:
             rating_inserted: Rating = Rating(
                 uuid=raw_data_queried[0], average=raw_data_queried[1], **rating.dict()
             )
-            self.connection.commit()
+            connection.commit()
+        self.connection_pool.putconn(connection)
+
         logging.info(f"Inserted rating {rating_inserted}")
         return rating_inserted
 
@@ -145,7 +173,8 @@ class DatabaseAccess:
         Returns:
             Rating | None: returns none if no rating is found
         """
-        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute("SELECT * FROM rating WHERE uuid = %s", str(uuid))
             if (query_result := cursor.fetchone()) is not None:
                 rating: Rating = Rating(**query_result)
@@ -153,6 +182,7 @@ class DatabaseAccess:
                 rating: None = None
                 logging.warning("Attemped to access record that does not exist.")
         logging.info(f"Retrieved Rating {rating}")
+        self.connection_pool.putconn(connection)
         return rating
 
     def update_rating(self, rating: Rating) -> Rating:
@@ -164,7 +194,8 @@ class DatabaseAccess:
         Returns:
             Rating: Rating object with uuid and average (av is ignored)
         """
-        with self.connection.cursor() as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
             cursor.execute(
                 "UPDATE rating SET story = %s, positions = %s, pussy = %s, shots = %s, boobs = %s, face = %s, rearview = %s WHERE uuid = %s",
                 (
@@ -178,12 +209,14 @@ class DatabaseAccess:
                     str(rating.uuid),
                 ),
             )
-            self.connection.commit()
+            connection.commit()
         logging.info(f"Updated Rating {rating}")
+        self.connection_pool.putconn(connection)
+
         return rating
 
     ## INDEXED
-    def insert_indexed(self, indexed: IndexedIn) -> Indexed:
+    def insert_indexed(self, indexed: IndexedIn) -> Indexed | None:
         """Inserts an indexed entry
 
         Args:
@@ -192,7 +225,8 @@ class DatabaseAccess:
         Returns:
             Indexed: indexed out, includes uuid
         """
-        with self.connection.cursor() as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO indexed (title, actresses, thumbnail, url) VALUES (%s, %s, %s, %s) RETURNING uuid",
                 (indexed.title, indexed.actresses, indexed.thumbnail, indexed.url),
@@ -201,10 +235,11 @@ class DatabaseAccess:
             indexed_inserted: Indexed = Indexed(
                 uuid=cursor.fetchone()[0], **indexed.dict()
             )
-            self.connection.commit()
-            return indexed_inserted
+            connection.commit()
+        self.connection_pool.putconn(connection)
+        return indexed_inserted
 
-    def get_indexed(self, uuid: UUID) -> Indexed:
+    def get_indexed(self, uuid: UUID) -> Indexed | None:
         """Given a indexed uuid, returns the indexed object
 
         Args:
@@ -213,7 +248,8 @@ class DatabaseAccess:
         Returns:
             Indexed: indexed item, uuid included
         """
-        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT * FROM indexed WHERE uuid = %s",
                 (str(uuid),),
@@ -224,6 +260,31 @@ class DatabaseAccess:
                 indexed: None = None
                 logging.warning("Attemped to access record that does not exist.")
         logging.info(f"Retrieved indexed {indexed}")
+        self.connection_pool.putconn(connection)
+        return indexed
+
+    def get_indexed_no_bytes(self, uuid: UUID) -> IndexedNoBytes:
+        """Given a indexed uuid, returns the indexed object
+
+        Args:
+            uuid (UUID): indexed item uuid
+
+        Returns:
+            Indexed: indexed item, uuid included
+        """
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                "SELECT uuid, title, actresses, thumbnail, url FROM indexed WHERE uuid = %s",
+                (str(uuid),),
+            )
+            if (query_result := cursor.fetchone()) is not None:
+                indexed: IndexedNoBytes = IndexedNoBytes(**query_result)
+            else:
+                indexed: None = None
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved indexed {indexed}")
+        self.connection_pool.putconn(connection)
         return indexed
 
     def get_page_indexed(self) -> list[Indexed]:
@@ -239,17 +300,19 @@ class DatabaseAccess:
         Returns:
             Film: film out object
         """
-        with self.connection.cursor() as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO film (title, duration, date_added, filename, watched, state, thumbnail, poster, download_progress) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING uuid",
                 (film.title, film.duration, film.date_added, film.filename, film.watched, film.state, film.thumbnail, film.poster, film.download_progress),
             )
             film_inserted = Film(uuid=cursor.fetchone()[0], **film.dict())
-            self.connection.commit()
+            connection.commit()
         logging.info(f"Inserted film {film_inserted}")
+        self.connection_pool.putconn(connection)
         return film_inserted
     
-    def get_film(self, uuid: UUID) -> Film:
+    def get_film(self, uuid: UUID) -> Film | None:
         """Gets a film from the database
 
         Args:
@@ -258,7 +321,8 @@ class DatabaseAccess:
         Returns:
             Film: film object
         """
-        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT * FROM film WHERE uuid = %s",
                 (str(uuid),),
@@ -269,9 +333,10 @@ class DatabaseAccess:
                 film: None = None
                 logging.warning("Attemped to access record that does not exist.")
         logging.info(f"Retrieved film {film}")
+        self.connection_pool.putconn(connection)
         return film
     
-    def get_film_no_bytes(self, uuid: UUID) -> FilmNoBytes:
+    def get_film_no_bytes(self, uuid: UUID) -> FilmNoBytes | None:
         """Gets a film from the database without the bytes
 
         Args:
@@ -280,7 +345,8 @@ class DatabaseAccess:
         Returns:
             Film: film object
         """
-        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT uuid, title, duration, date_added, filename, watched, state, download_progress FROM film WHERE uuid = %s",
                 (str(uuid),),
@@ -291,10 +357,11 @@ class DatabaseAccess:
                 film: None = None
                 logging.warning("Attemped to access record that does not exist.")
         logging.info(f"Retrieved film {film}")
+        self.connection_pool.putconn(connection)
         return film
     
     def get_film_thumbnail(self, uuid: UUID) -> bytes:
-        """Gets a film from the database without the bytes
+        """gets the thumbnail for a film
 
         Args:
             uuid (UUID): film uuid
@@ -302,7 +369,8 @@ class DatabaseAccess:
         Returns:
             bytes: image as bytes
         """
-        with self.connection.cursor() as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT thumbnail FROM film WHERE uuid = %s",
                 (str(uuid),),
@@ -313,10 +381,11 @@ class DatabaseAccess:
                 thumbnail_bytes: bytes = bytes()
                 logging.warning("Attemped to access record that does not exist.")
         logging.info(f"Retrieved film {uuid} thumbnail")
+        self.connection_pool.putconn(connection)
         return thumbnail_bytes
     
     def get_film_poster(self, uuid: UUID) -> bytes:
-        """Gets a film from the database without the bytes
+        """gets poster for a film
 
         Args:
             uuid (UUID): film uuid
@@ -324,7 +393,8 @@ class DatabaseAccess:
         Returns:
             bytes: image as bytes
         """
-        with self.connection.cursor() as cursor:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT poster FROM film WHERE uuid = %s",
                 (str(uuid),),
@@ -335,4 +405,102 @@ class DatabaseAccess:
                 poster_bytes: bytes = bytes()
                 logging.warning("Attemped to access record that does not exist.")
         logging.info(f"Retrieved film {uuid} thumbnail")
+        self.connection_pool.putconn(connection)
         return poster_bytes
+    
+    ## QUEUE
+
+    def insert_queue(self, queue: QueueIn) -> Queue:
+        """Inserts a queue item into the database
+
+        Args:
+            queue (QueueIn): queue in object
+
+        Returns:
+            Queue: queue out object
+        """
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO queue (url, film_uuid) VALUES (%s, %s) RETURNING uuid",
+                (queue.url, str(queue.film_uuid)),
+            )
+            queue_inserted = Queue(uuid=cursor.fetchone()[0], **queue.dict())
+            connection.commit()
+        logging.info(f"Inserted queue {queue_inserted}")
+        connection = self.connection_pool.getconn()
+        return queue_inserted
+    
+    def get_and_pop_queue(self) -> Queue | None:
+        """Gets and pops a queue item from the database
+
+        Returns:
+            Queue: queue out object
+        """
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                "SELECT * FROM queue WHERE uuid = ( SELECT uuid FROM queue ORDER BY uuid LIMIT 1 FOR UPDATE SKIP LOCKED) LIMIT 1 FOR UPDATE;",
+            )
+            if (query_result := cursor.fetchone()) is not None:
+                queue: Queue = Queue(**query_result)
+                cursor.execute(
+                    "DELETE FROM queue WHERE uuid = %s",
+                    (str(queue.uuid),),
+                )
+                connection.commit()
+            else:
+                queue: None = None
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved queue {queue}")
+        self.connection_pool.putconn(connection)
+        return queue
+    
+    def drop(self):
+        """Drops all tables in the database"""
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "DROP TABLE IF EXISTS queue CASCADE",
+            )
+            cursor.execute(
+                "DROP TABLE IF EXISTS film CASCADE",
+            )
+            cursor.execute(
+                "DROP TABLE IF EXISTS film_actress_rating CASCADE",
+            )
+            cursor.execute(
+                "DROP TABLE IF EXISTS actress CASCADE",
+            )
+            cursor.execute(
+                "DROP TABLE IF EXISTS film CASCADE",
+            )
+            cursor.execute(
+                "DROP TABLE IF EXISTS rating CASCADE",
+            )
+
+            cursor.execute(
+                "DROP TABLE IF EXISTS film CASCADE",
+            )
+            cursor.execute(
+                "DROP TRIGGER IF EXISTS update_rating_average_trigger ON rating;"
+            )
+            cursor.execute(
+                "DROP FUNCTION IF EXISTS update_rating_average();"
+            )
+            cursor.execute(
+                "DROP EXTENSION IF EXISTS \"uuid-ossp\" CASCADE;"
+            )
+            cursor.execute(
+                "DROP TYPE IF EXISTS film_state"
+            )
+            cursor.execute(
+                "DROP TABLE IF EXISTS indexed CASCADE;"
+            )
+            if input("ENTER Y TO RESET DATABASE: ") == "y":
+                logging.warning("DROPPING DATABASE")
+                connection.commit()
+            else:
+                logging.warning("NOT DROPPING DATABASE")
+                connection.rollback()
+        self.connection_pool.putconn(connection)
