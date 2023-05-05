@@ -60,3 +60,13 @@ class Film(BaseModel):
         if isinstance(value, memoryview):
             return bytes(value)
         return value
+
+class FilmNoBytes(BaseModel):
+    uuid: UUID = Field(alias="uuid")
+    title: str = Field(alias="title")
+    duration: timedelta = Field(alias="duration")
+    date_added: date = Field(alias="date_added")
+    filename: str = Field(alias="filename")
+    watched: bool = Field(alias="watched")
+    state: FilmStateEnum = Field(alias="state")
+    download_progress: int = Field(alias="download_progress")

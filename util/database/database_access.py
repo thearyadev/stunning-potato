@@ -4,7 +4,7 @@ from pathlib import Path
 import logging
 from util.models.film_actress_rating import FilmActressRating
 from util.models.actress import ActressIn, Actress
-from util.models.film import FilmIn, Film
+from util.models.film import FilmIn, Film, FilmNoBytes
 from util.models.indexed import IndexedIn, Indexed
 from util.models.queue import QueueIn, Queue
 from util.models.rating import RatingIn, Rating
@@ -198,7 +198,9 @@ class DatabaseAccess:
                 (indexed.title, indexed.actresses, indexed.thumbnail, indexed.url),
             )
             logging.info(f"Inserted indexed {indexed}")
-            indexed_inserted: Indexed = Indexed(uuid=cursor.fetchone()[0], **indexed.dict())
+            indexed_inserted: Indexed = Indexed(
+                uuid=cursor.fetchone()[0], **indexed.dict()
+            )
             self.connection.commit()
             return indexed_inserted
 
@@ -223,7 +225,114 @@ class DatabaseAccess:
                 logging.warning("Attemped to access record that does not exist.")
         logging.info(f"Retrieved indexed {indexed}")
         return indexed
-    
+
     def get_page_indexed(self) -> list[Indexed]:
         """This method will be used to get a page of indexed items. TBI"""
         ...
+
+    def insert_film(self, film: FilmIn) -> Film:
+        """Inserts a film into the database
+
+        Args:
+            film (FilmIn): film in object
+
+        Returns:
+            Film: film out object
+        """
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO film (title, duration, date_added, filename, watched, state, thumbnail, poster, download_progress) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING uuid",
+                (film.title, film.duration, film.date_added, film.filename, film.watched, film.state, film.thumbnail, film.poster, film.download_progress),
+            )
+            film_inserted = Film(uuid=cursor.fetchone()[0], **film.dict())
+            self.connection.commit()
+        logging.info(f"Inserted film {film_inserted}")
+        return film_inserted
+    
+    def get_film(self, uuid: UUID) -> Film:
+        """Gets a film from the database
+
+        Args:
+            uuid (UUID): film uuid
+
+        Returns:
+            Film: film object
+        """
+        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                "SELECT * FROM film WHERE uuid = %s",
+                (str(uuid),),
+            )
+            if (query_result := cursor.fetchone()) is not None:
+                film: Film = Film(**query_result)
+            else:
+                film: None = None
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved film {film}")
+        return film
+    
+    def get_film_no_bytes(self, uuid: UUID) -> FilmNoBytes:
+        """Gets a film from the database without the bytes
+
+        Args:
+            uuid (UUID): film uuid
+
+        Returns:
+            Film: film object
+        """
+        with self.connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                "SELECT uuid, title, duration, date_added, filename, watched, state, download_progress FROM film WHERE uuid = %s",
+                (str(uuid),),
+            )
+            if (query_result := cursor.fetchone()) is not None:
+                film: FilmNoBytes = FilmNoBytes(**query_result)
+            else:
+                film: None = None
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved film {film}")
+        return film
+    
+    def get_film_thumbnail(self, uuid: UUID) -> bytes:
+        """Gets a film from the database without the bytes
+
+        Args:
+            uuid (UUID): film uuid
+
+        Returns:
+            bytes: image as bytes
+        """
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT thumbnail FROM film WHERE uuid = %s",
+                (str(uuid),),
+            )
+            if (query_result := cursor.fetchone()) is not None:
+                thumbnail_bytes: bytes = bytes(query_result[0])
+            else:
+                thumbnail_bytes: bytes = bytes()
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved film {uuid} thumbnail")
+        return thumbnail_bytes
+    
+    def get_film_poster(self, uuid: UUID) -> bytes:
+        """Gets a film from the database without the bytes
+
+        Args:
+            uuid (UUID): film uuid
+
+        Returns:
+            bytes: image as bytes
+        """
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT poster FROM film WHERE uuid = %s",
+                (str(uuid),),
+            )
+            if (query_result := cursor.fetchone()) is not None:
+                poster_bytes: bytes = bytes(query_result[0])
+            else:
+                poster_bytes: bytes = bytes()
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved film {uuid} thumbnail")
+        return poster_bytes
