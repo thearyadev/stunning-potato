@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, validator
 
 class FilmStateEnum(str, Enum):
     DOWNLOADING = "DOWNLOADING"
-    IN_QUEUE = "IN_QUEUE"
+    IN_QUEUE = "IN QUEUE"
     COMPLETE = "COMPLETE"
 
 
@@ -18,6 +18,8 @@ class FilmIn(BaseModel):
     filename: str = Field(alias="filename")
     watched: bool = Field(alias="watched")
     state: FilmStateEnum = Field(alias="state")
+    actresses: list[str] = Field(alias="actresses")
+    rating: UUID = Field(alias="rating")
 
     thumbnail: bytes = Field(alias="thumbnail")
     poster: bytes = Field(alias="poster")
@@ -41,6 +43,9 @@ class Film(BaseModel):
     filename: str = Field(alias="filename")
     watched: bool = Field(alias="watched")
     state: FilmStateEnum = Field(alias="state")
+    actresses: list[str] = Field(alias="actresses")
+    rating: UUID = Field(alias="rating")
+
 
     thumbnail: bytes = Field(alias="thumbnail")
     poster: bytes = Field(alias="poster")
@@ -72,3 +77,19 @@ class FilmNoBytes(BaseModel):
     watched: bool = Field(alias="watched")
     state: FilmStateEnum = Field(alias="state")
     download_progress: int = Field(alias="download_progress")
+    actresses: list[str] = Field(alias="actresses")
+    rating: UUID = Field(alias="rating")
+
+class FilmNoBytesWithAverage(BaseModel):
+    uuid: UUID = Field(alias="uuid")
+    title: str = Field(alias="title")
+    duration: timedelta = Field(alias="duration")
+    date_added: date = Field(alias="date_added")
+    filename: str = Field(alias="filename")
+    watched: bool = Field(alias="watched")
+    state: FilmStateEnum = Field(alias="state")
+    download_progress: int = Field(alias="download_progress")
+    actresses: list[str] = Field(alias="actresses")
+    rating: UUID = Field(alias="rating")
+    average: float = Field(alias="average")
+

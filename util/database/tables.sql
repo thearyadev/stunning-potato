@@ -8,14 +8,6 @@ BEGIN
 END $$;
 
 
-
-
--- Actresses table
-CREATE TABLE IF NOT EXISTS actress (
-  uuid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name_ text NOT NULL
-);
-
 -- Rating table
 CREATE TABLE IF NOT EXISTS rating (
   uuid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -67,15 +59,9 @@ CREATE TABLE IF NOT EXISTS film (
   download_progress integer NOT NULL CHECK (
     download_progress BETWEEN 0
     AND 100
-  ) 
-);
-
--- Junction table for film-actress-rating
-CREATE TABLE IF NOT EXISTS film_actress_rating (
-  uuid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  film_uuid uuid REFERENCES film(uuid),
-  actress_uuid uuid [] NOT NULL,
-  rating_uuid uuid REFERENCES rating(uuid)
+  ),
+  actresses text[] NOT NULL,
+  rating uuid REFERENCES rating(uuid)
 );
 
 -- Indexed

@@ -6,13 +6,15 @@ from uuid import UUID
 import psycopg2
 from psycopg2 import pool
 from psycopg2.extras import DictCursor
-
+from psycopg2.extras import UUID_adapter
+from psycopg2.extras import register_uuid
 from util.models.actress import Actress, ActressIn
-from util.models.film import Film, FilmIn, FilmNoBytes
+from util.models.film import Film, FilmIn, FilmNoBytes, FilmStateEnum, FilmNoBytesWithAverage
 from util.models.film_actress_rating import FilmActressRating, FilmActressRatingIn
 from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
+from datetime import date, timedelta
 
 
 class DatabaseAccess:
@@ -35,8 +37,8 @@ class DatabaseAccess:
         self.db_port = db_port
         self.min_connections = min_connections
         self.max_connections = max_connections
-
-        self.connection_pool = pool.ThreadedConnectionPool(
+        register_uuid()
+        self.connection_pool = pool.SimpleConnectionPool(
             host=self.db_host,
             port=self.db_port,
             dbname=self.db_name,
@@ -61,73 +63,13 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
         logging.info("Initialized database")
 
-    ## ACTRESS
-    def insert_actress(self, actress: ActressIn) -> Actress:
-        """Adds an actress to the database
-
-        Args:
-            actress (ActressIn): Actress in (no uuid)
-
-        Returns:
-            Actress: Actress out (with uuid)
-        """
-        connection = self.connection_pool.getconn()
-
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO actress (name_) VALUES (%s) RETURNING uuid",
-                (actress.name_,),
-            )
-            # returns uuid, capture and recreate object
-            actress_inserted: Actress = Actress(
-                uuid=cursor.fetchone()[0], name_=actress.name_
-            )
-            connection.commit()
-        self.connection_pool.putconn(connection)
-        logging.info(f"Inserted actress {actress_inserted}")
-
-    def get_actress(self, uuid: UUID) -> Actress | None:
-        """Gets an actress by the uuid
-
-        Args:
-            uuid (UUID):  uuid of the actress in the database
-
-        Returns:
-            Actress | None: Returns none if no actress is found
-        """
-        connection = self.connection_pool.getconn()
-
-        with connection.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute(
-                "SELECT uuid, name_ FROM actress WHERE uuid = %s",
-                (str(uuid),),
-            )
-            if (query_result := cursor.fetchone()) is not None:
-                actress: Actress = Actress(**query_result)
-            else:
-                actress: None = None
-                logging.warning("Attemped to access record that does not exist.")
-        logging.info(f"Retrieved actress {actress}")
-        self.connection_pool.putconn(connection)
-        return actress
-
     def get_all_actresses(self) -> list[Actress]:
         """Gets all actresses from the database
 
         Returns:
             list[Actress]: list of actress out objects
         """
-        connection = self.connection_pool.getconn()
-        with connection.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute(
-                "SELECT uuid, name_ FROM actress",
-            )
-            actresses: list[Actress] = [
-                Actress(**actress) for actress in cursor.fetchall()
-            ]
-        logging.info(f"Retrieved {len(actresses)} actresses")
-        self.connection_pool.putconn(connection)
-        return actresses
+        ...
 
     ## RATING
 
@@ -176,7 +118,7 @@ class DatabaseAccess:
         """
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute("SELECT * FROM rating WHERE uuid = %s", str(uuid))
+            cursor.execute("SELECT * FROM rating WHERE uuid = %s", (str(uuid),))
             if (query_result := cursor.fetchone()) is not None:
                 rating: Rating = Rating(**query_result)
             else:
@@ -207,7 +149,7 @@ class DatabaseAccess:
                     rating.boobs,
                     rating.face,
                     rating.rearview,
-                    str(rating.uuid),
+                    rating.uuid,
                 ),
             )
             connection.commit()
@@ -253,7 +195,7 @@ class DatabaseAccess:
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT * FROM indexed WHERE uuid = %s",
-                (str(uuid),),
+                (uuid,),
             )
             if (query_result := cursor.fetchone()) is not None:
                 indexed: Indexed = Indexed(**query_result)
@@ -277,7 +219,7 @@ class DatabaseAccess:
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT uuid, title, actresses, thumbnail, url FROM indexed WHERE uuid = %s",
-                (str(uuid),),
+                (uuid,),
             )
             if (query_result := cursor.fetchone()) is not None:
                 indexed: IndexedNoBytes = IndexedNoBytes(**query_result)
@@ -304,7 +246,7 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO film (title, duration, date_added, filename, watched, state, thumbnail, poster, download_progress) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING uuid",
+                "INSERT INTO film (title, duration, date_added, filename, watched, state, thumbnail, poster, download_progress, actresses, rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING uuid",
                 (
                     film.title,
                     film.duration,
@@ -315,8 +257,11 @@ class DatabaseAccess:
                     film.thumbnail,
                     film.poster,
                     film.download_progress,
+                    film.actresses,
+                    film.rating,
                 ),
             )
+
             film_inserted = Film(uuid=cursor.fetchone()[0], **film.dict())
             connection.commit()
         logging.info(f"Inserted film {film_inserted}")
@@ -336,7 +281,7 @@ class DatabaseAccess:
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
                 "SELECT * FROM film WHERE uuid = %s",
-                (str(uuid),),
+                (uuid,),
             )
             if (query_result := cursor.fetchone()) is not None:
                 film: Film = Film(**query_result)
@@ -359,8 +304,8 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                "SELECT uuid, title, duration, date_added, filename, watched, state, download_progress FROM film WHERE uuid = %s",
-                (str(uuid),),
+                "SELECT uuid, title, duration, date_added, filename, watched, state, download_progress, actresses, rating FROM film WHERE uuid = %s",
+                (uuid,),
             )
             if (query_result := cursor.fetchone()) is not None:
                 film: FilmNoBytes = FilmNoBytes(**query_result)
@@ -384,7 +329,7 @@ class DatabaseAccess:
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT thumbnail FROM film WHERE uuid = %s",
-                (str(uuid),),
+                (uuid,),
             )
             if (query_result := cursor.fetchone()) is not None:
                 thumbnail_bytes: bytes = bytes(query_result[0])
@@ -408,7 +353,7 @@ class DatabaseAccess:
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT poster FROM film WHERE uuid = %s",
-                (str(uuid),),
+                (uuid,),
             )
             if (query_result := cursor.fetchone()) is not None:
                 poster_bytes: bytes = bytes(query_result[0])
@@ -434,7 +379,7 @@ class DatabaseAccess:
         with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO queue (url, film_uuid) VALUES (%s, %s) RETURNING uuid",
-                (queue.url, str(queue.film_uuid)),
+                (queue.url, queue.film_uuid),
             )
             queue_inserted = Queue(uuid=cursor.fetchone()[0], **queue.dict())
             connection.commit()
@@ -454,48 +399,34 @@ class DatabaseAccess:
                 "SELECT * FROM queue WHERE uuid = ( SELECT uuid FROM queue ORDER BY uuid LIMIT 1 FOR UPDATE SKIP LOCKED) LIMIT 1 FOR UPDATE;",
             )
             if (query_result := cursor.fetchone()) is not None:
-                queue: Queue = Queue(**query_result)
+                queueRetrieved: Queue = Queue(**query_result)
                 cursor.execute(
                     "DELETE FROM queue WHERE uuid = %s",
-                    (str(queue.uuid),),
+                    (queueRetrieved.uuid,),
                 )
                 connection.commit()
             else:
-                queue: None = None
+                queueRetrieved: None = None
                 logging.warning("Attemped to access record that does not exist.")
-        logging.info(f"Retrieved queue {queue}")
+        logging.info(f"Retrieved queue {queueRetrieved}")
         self.connection_pool.putconn(connection)
-        return queue
+        return queueRetrieved
 
-    ## FILM_ACTRESS_RATING
-    def insert_film_actress_rating(
-        self, film_actress_rating: FilmActressRating
-    ) -> FilmActressRating:
-        """Inserts a film actress rating into the database
-
-        Args:
-            film_actress_rating (FilmActressRatingIn): film actress rating object
+    def get_all_films_no_bytes_with_rating_average(self) -> list[FilmNoBytesWithAverage]:
+        """Gets all films from the database
 
         Returns:
-            FilmActressRating: film actress rating object. Includes uuid
+            list[Film]: list of film objects
         """
         connection = self.connection_pool.getconn()
-        with connection.cursor() as cursor:
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                "INSERT INTO film_actress_rating (film_uuid, actress_uuid, rating_uuid) VALUES (%s, %s, %s) RETURNING uuid",
-                (
-                    str(film_actress_rating.film_uuid),
-                    str(film_actress_rating.actress_uuid),
-                    str(film_actress_rating.rating_uuid),
-                ),
+                "SELECT f.uuid, f.title, f.duration, f.date_added, f.filename, f.watched, f.state, f.download_progress, f.actresses, f.rating, r.average FROM film f join rating r on f.rating = r.uuid",
             )
-            film_actress_rating_inserted = FilmActressRating(
-                uuid=cursor.fetchone()[0], **film_actress_rating.dict()
-            )
-            connection.commit()
-        logging.info(f"Inserted film actress rating {film_actress_rating_inserted}")
-        connection = self.connection_pool.putconn()
-        return film_actress_rating_inserted
+            films: list[FilmNoBytesWithAverage] = [FilmNoBytesWithAverage(**film) for film in cursor.fetchall()]
+        logging.info(f"Retrieved all films")
+        self.connection_pool.putconn(connection)
+        return films
 
     def drop(self):
         """Drops all tables in the database"""
@@ -550,11 +481,10 @@ class DatabaseAccess:
             "Kenna James",
             "Maya Woulfe",
         ]
-        actresses = []
-        for actress in list_of_porn_actresses:
-            actresses.append(self.insert_actress(ActressIn(name=actress)))
-        ratings = []
-        for _ in range(10):
+
+        ratings: list[Rating] = []
+
+        for _ in range(500):
             ratings.append(
                 self.insert_rating(
                     RatingIn(
@@ -566,5 +496,46 @@ class DatabaseAccess:
                         face=random.randint(0, 10),
                         rearview=random.randint(0, 10),
                     )
+                )
+            )
+
+        films: list[Film] = []
+
+        for i in range(len(ratings)):
+            films.append(
+                self.insert_film(
+                    FilmIn(
+                        title=f"sexy time {i + 1}",
+                        duration=timedelta(seconds=random.randint(500, 5000)),
+                        date_added=date(2022, 4, 22)
+                        + timedelta(
+                            days=random.randint(
+                                0, (date(2023, 4, 22) - date(2022, 4, 22)).days
+                            )
+                        ),
+                        watched=random.choice([True, False]),
+                        state=random.choice(list(FilmStateEnum)),
+                        thumbnail=b"this is a thumbnail",
+                        poster=b"this is a poster",
+                        download_progress=random.randint(0, 100),
+                        filename=f"film_number_{i * random.randint(1, 20)}",
+                        actresses=random.sample(
+                            list_of_porn_actresses, random.randint(1, 3)
+                        ),
+                        rating=ratings[i].uuid,
+                    )
+                )
+            )
+
+        for i in range(500):
+            self.insert_indexed(
+                IndexedIn(
+                    title=f"Downloadable Film #{i}",
+                    actresses=random.sample(
+                        ["Scarlet Skies", "Aria Banks", "Lily Larimar"],
+                        random.randint(1, 3),
+                    ),
+                    thumbnail=b"this is a thumbnail",
+                    url=f"https://www.pornhub.com/view_video.php?viewkey={i}",
                 )
             )

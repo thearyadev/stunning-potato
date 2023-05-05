@@ -6,30 +6,40 @@ from uuid import UUID
 from rich.logging import RichHandler
 
 from util.database.database_access import DatabaseAccess
-from util.models.actress import ActressIn
-from util.models.film import Film, FilmIn, FilmStateEnum
+from util.models.actress import ActressIn, Actress
+from util.models.film import Film, FilmIn, FilmStateEnum, FilmNoBytes, FilmNoBytesWithAverage
 from util.models.indexed import Indexed, IndexedIn
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
-
+import time
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.CRITICAL,
     format="\[%(module)s.%(funcName)s] %(message)s",
-    handlers=[RichHandler(markup=True)],
+    # handlers=[RichHandler(markup=True)],
 )
 
 
 db = DatabaseAccess("lewdlocale", "lewdlocale", "lewdlocale", "localhost", "5432")
 db.initialize(Path("util/database/tables.sql"))
+db.drop()
+db.initialize(Path("util/database/tables.sql"))
+db.populate_demo_data()
+s= time.perf_counter()
+data: list[FilmNoBytesWithAverage] = db.get_all_films_no_bytes_with_rating_average()
 
-# db.insert_queue(
-#     QueueIn(
-#         url="this is a url3",
-#         film_uuid=UUID("e5c45cd7-2d8f-4aff-a16a-96a766ec4304")
-#     )
-# )
-#
+e = time.perf_counter()
+
+for i in data:
+    print(i.average)
 
 
-# print(db.get_and_pop_queue())
-# db.drop()
+print(f"Time: {e-s}")
+"""
+
+list_view: title, date, actresses, rating, state
+
+1. get all film_actress_rating
+2. for each entry, get the filmNoBytes, Actress Array, Rating Object
+
+
+"""
