@@ -456,6 +456,10 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
         return queue
     
+
+    ## FILM_ACTRESS_RATING
+    # --
+    
     def drop(self):
         """Drops all tables in the database"""
         connection = self.connection_pool.getconn()
@@ -504,3 +508,6 @@ class DatabaseAccess:
                 logging.warning("NOT DROPPING DATABASE")
                 connection.rollback()
         self.connection_pool.putconn(connection)
+    
+    def populate_demo_data(self):
+        ...
