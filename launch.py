@@ -12,7 +12,8 @@ from util.models.queue import QueueIn, Queue
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(levelname)s %(message)s",
+
+    format="\[%(module)s.%(funcName)s] %(message)s",
     handlers=[RichHandler(markup=True)],
 )
 
@@ -30,4 +31,4 @@ db.initialize(Path("util/database/tables.sql"))
 
 
 # print(db.get_and_pop_queue())
-db.drop()
+# db.drop()
