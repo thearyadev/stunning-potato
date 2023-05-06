@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class IndexedIn:
+    film_id: int
     title: str 
     actresses: list[str] 
     thumbnail: bytes 
@@ -12,6 +13,7 @@ class IndexedIn:
 @dataclass
 class Indexed:
     uuid: UUID 
+    film_id: int
     title: str
     actresses: list[str] 
     thumbnail: bytes | memoryview 
@@ -21,6 +23,7 @@ class Indexed:
 @dataclass
 class IndexedNoBytes:
     uuid: UUID 
+    film_id: int
     title: str 
     actresses: list[str] 
     url: str 

@@ -8,12 +8,14 @@ import urllib.parse
 import re
 from PIL import Image
 from io import BytesIO
+from beartype import beartype
 
 IFRAME_BLACKLIST: list[str] = json.loads(
     Path("util/scraper/iframe_url_blacklist.json").read_text()
 ).get("blacklist")
 
 
+@beartype
 def parse_url(url: str) -> str:
     """Parse url and return url with scheme if missing
 
@@ -29,6 +31,8 @@ def parse_url(url: str) -> str:
 
     return parsed.geturl()
 
+
+@beartype
 def get_film_title(document: BeautifulSoup) -> str:
     """Get film title from document. Document MUST be hqporner detail page
 
@@ -41,6 +45,7 @@ def get_film_title(document: BeautifulSoup) -> str:
     return document.find("h1", class_="main-h1").text.title()
 
 
+@beartype
 def get_film_actresses(document: BeautifulSoup) -> list[str]:
     """Get film actresses from document. Document MUST be hqporner detail page
 
@@ -50,11 +55,14 @@ def get_film_actresses(document: BeautifulSoup) -> list[str]:
     Returns:
         list[str]:  actresses
     """
-    actresses: list[str] = [a.text for a in document.find("li", class_="fa-star-o").find_all("a")]
+    actresses: list[str] = [
+        a.text for a in document.find("li", class_="fa-star-o").find_all("a")
+    ]
     logging.info(f"Parsed Film Actresses {actresses}")
     return actresses
 
 
+@beartype
 def get_film_duration(document: BeautifulSoup) -> timedelta:
     """Get film duration from document. Document MUST be hqporner detail page
 
@@ -79,6 +87,7 @@ def get_film_duration(document: BeautifulSoup) -> timedelta:
     return delta
 
 
+@beartype
 def get_iframe_source(document: BeautifulSoup) -> str:
     """Get iframe source from document. Document MUST be hqporner detail page
 
@@ -100,6 +109,7 @@ def get_iframe_source(document: BeautifulSoup) -> str:
     raise ValueError("No iframe found")
 
 
+@beartype
 def get_poster(document: BeautifulSoup) -> bytes:
     """Get poster from document, Document MUST be iframe document
 
@@ -117,6 +127,8 @@ def get_poster(document: BeautifulSoup) -> bytes:
     logging.info(f"Poster url found {poster_url}... Downloading.")
     return requests.get(poster_url).content
 
+
+@beartype
 def get_download_url(document: BeautifulSoup) -> bytes:
     """Get download url from document. Document MUST be iframe document
 
@@ -134,6 +146,8 @@ def get_download_url(document: BeautifulSoup) -> bytes:
     logging.info(f"Download url found {download_url}")
     return download_url
 
+
+@beartype
 def generate_thumbnail(poster: bytes) -> bytes:
     """Generate thumbnail from poster
 

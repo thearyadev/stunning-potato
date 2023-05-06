@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
 import logging
+from beartype import beartype
 
-
+@beartype
 def get_document(url: str) -> BeautifulSoup:
     """Get document from url
 

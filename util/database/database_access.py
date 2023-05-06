@@ -13,8 +13,9 @@ from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
 from datetime import date, timedelta
+from beartype import beartype
 
-
+@beartype 
 class DatabaseAccess:
     """Connection to PostgreSQL database tools"""
 
@@ -24,7 +25,7 @@ class DatabaseAccess:
         db_user: str,
         db_password: str,
         db_host: str,
-        db_port: str,
+        db_port: int,
         max_connections: int = 5,
         min_connections: int = 1,
     ):
@@ -97,7 +98,7 @@ class DatabaseAccess:
             # contains a tuple of uuid and average
             raw_data_queried: tuple[str] = cursor.fetchone()
             rating_inserted: Rating = Rating(
-                uuid=raw_data_queried[0], average=raw_data_queried[1], **rating.dict()
+                uuid=raw_data_queried[0], average=raw_data_queried[1], **rating.__dict__
             )
             connection.commit()
         self.connection_pool.putconn(connection)
@@ -169,12 +170,12 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO indexed (title, actresses, thumbnail, url) VALUES (%s, %s, %s, %s) RETURNING uuid",
-                (indexed.title, indexed.actresses, indexed.thumbnail, indexed.url),
+                "INSERT INTO indexed (title, actresses, thumbnail, url, film_id) VALUES (%s, %s, %s, %s, %s) RETURNING uuid",
+                (indexed.title, indexed.actresses, indexed.thumbnail, indexed.url, indexed.film_id),
             )
             logging.info(f"Inserted indexed {indexed}")
             indexed_inserted: Indexed = Indexed(
-                uuid=cursor.fetchone()[0], **indexed.dict()
+                uuid=cursor.fetchone()[0], **indexed.__dict__
             )
             connection.commit()
         self.connection_pool.putconn(connection)
@@ -216,7 +217,7 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                "SELECT uuid, title, actresses, thumbnail, url FROM indexed WHERE uuid = %s",
+                "SELECT uuid, title, actresses, thumbnail, url, film_id FROM indexed WHERE uuid = %s",
                 (uuid,),
             )
             if (query_result := cursor.fetchone()) is not None:
@@ -231,6 +232,27 @@ class DatabaseAccess:
     def get_page_indexed(self) -> list[Indexed]:
         """This method will be used to get a page of indexed items. TBI"""
         ...
+
+
+    def get_oldest_indexed(self) -> IndexedNoBytes | None:
+        """gets the oldest indexed value, if it exists. 
+
+        Returns:
+            Indexed | None: indexed item or none
+        """
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                "SELECT uuid, title, actresses, thumbnail, url, film_id FROM indexed ORDER BY film_id ASC LIMIT 1",
+            )
+            if (query_result := cursor.fetchone()) is not None:
+                indexed: IndexedNoBytes = IndexedNoBytes(**query_result)
+            else:
+                indexed: None = None
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved indexed {indexed}")
+        self.connection_pool.putconn(connection)
+        return indexed
 
     def insert_film(self, film: FilmIn) -> Film:
         """Inserts a film into the database
@@ -260,7 +282,7 @@ class DatabaseAccess:
                 ),
             )
 
-            film_inserted = Film(uuid=cursor.fetchone()[0], **film.dict())
+            film_inserted = Film(uuid=cursor.fetchone()[0], **film.__dict__)
             connection.commit()
         logging.info(f"Inserted film {film_inserted}")
         self.connection_pool.putconn(connection)
@@ -535,5 +557,6 @@ class DatabaseAccess:
                     ),
                     thumbnail=b"this is a thumbnail",
                     url=f"https://www.pornhub.com/view_video.php?viewkey={i}",
+                    film_id=i
                 )
             )

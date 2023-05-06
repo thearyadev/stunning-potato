@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS film (
 -- Indexed
 CREATE TABLE IF NOT EXISTS indexed (
   uuid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  film_id integer not null,
   title text NOT NULL,
   actresses text [] NOT NULL,
   thumbnail bytea NOT NULL,

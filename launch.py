@@ -1,41 +1,22 @@
-import logging
-from util.scraper.detail_page import (
-    get_film_title,
-    get_film_actresses,
-    get_film_duration,
-    get_iframe_source,
-    get_poster,
-    get_download_url,
-    generate_thumbnail
-)
-from util.scraper.document import get_document
+# import argparse
+# parser = argparse.ArgumentParser(description='pogger')
+# parser.add_argument(
+#     "--log-level", type=str, default="INFO", help="logging level: INFO, DEBUG, WARNING, ERROR, CRITICAL"
+# )
+# parser.add_argument("--app", type=str, help="app name", choices=["server", "downloader", "indexer"])
+# args = parser.parse_args()
+# print(args)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(module)s.%(funcName)s] %(message)s",
-)
-doc = get_document("https://hqporner.com/hdporn/111444-natural_at_making_people_happy.html")
-title = get_film_title(doc)
-actresses = get_film_actresses(doc)
-duration = get_film_duration(doc)
-iframe_src = get_iframe_source(doc)
-iframe_doc = get_document(iframe_src)
-poster = get_poster(iframe_doc)
-video_url = get_download_url(iframe_doc)
-thumbnail = generate_thumbnail(poster)
 
-"""
-Scraper
 
-- detail page scraper
-    - get document
-    - get title
-    - get actresses
-    - get thumbnail ( from poster )
-    - get download url
-    - get iframe url
-    - get poster
-- list page scraper
-    - all urls on a page
+# from indexer.indexer import Indexer
+from util.database.database_access import DatabaseAccess
+from pathlib import Path
 
-"""
+db = DatabaseAccess("lewdlocale", "lewdlocale", "lewdlocale", "localhost", 5432)
+db.drop()
+db.initialize(Path("util/database/tables.sql"))
+db.populate_demo_data()
+# indexer = Indexer(databaseAccess=db)
+# indexer.main_loop()
+
