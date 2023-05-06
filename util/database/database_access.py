@@ -8,14 +8,21 @@ from psycopg2 import pool
 from psycopg2.extras import DictCursor
 from psycopg2.extras import UUID_adapter
 from psycopg2.extras import register_uuid
-from util.models.film import Film, FilmIn, FilmNoBytes, FilmStateEnum, FilmNoBytesWithAverage
+from util.models.film import (
+    Film,
+    FilmIn,
+    FilmNoBytes,
+    FilmStateEnum,
+    FilmNoBytesWithAverage,
+)
 from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
 from datetime import date, timedelta
 from beartype import beartype
 
-@beartype 
+
+@beartype
 class DatabaseAccess:
     """Connection to PostgreSQL database tools"""
 
@@ -171,7 +178,13 @@ class DatabaseAccess:
         with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO indexed (title, actresses, thumbnail, url, film_id) VALUES (%s, %s, %s, %s, %s) RETURNING uuid",
-                (indexed.title, indexed.actresses, indexed.thumbnail, indexed.url, indexed.film_id),
+                (
+                    indexed.title,
+                    indexed.actresses,
+                    indexed.thumbnail,
+                    indexed.url,
+                    indexed.film_id,
+                ),
             )
             logging.info(f"Inserted indexed {indexed}")
             indexed_inserted: Indexed = Indexed(
@@ -240,21 +253,17 @@ class DatabaseAccess:
         """
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT uuid FROM indexed WHERE film_id = %s", (film_id,)
-            )
+            cursor.execute("SELECT uuid FROM indexed WHERE film_id = %s", (film_id,))
             result: bool = bool(cursor.fetchone())
         self.connection_pool.putconn(connection)
         return result
-
 
     def get_page_indexed(self) -> list[Indexed]:
         """This method will be used to get a page of indexed items. TBI"""
         ...
 
-
     def get_oldest_indexed(self) -> IndexedNoBytes | None:
-        """gets the oldest indexed value, if it exists. 
+        """gets the oldest indexed value, if it exists.
 
         Returns:
             Indexed | None: indexed item or none
@@ -451,7 +460,9 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
         return queueRetrieved
 
-    def get_all_films_no_bytes_with_rating_average(self) -> list[FilmNoBytesWithAverage]:
+    def get_all_films_no_bytes_with_rating_average(
+        self,
+    ) -> list[FilmNoBytesWithAverage]:
         """Gets all films from the database
 
         Returns:
@@ -462,7 +473,9 @@ class DatabaseAccess:
             cursor.execute(
                 "SELECT f.uuid, f.title, f.duration, f.date_added, f.filename, f.watched, f.state, f.download_progress, f.actresses, f.rating, r.average FROM film f join rating r on f.rating = r.uuid",
             )
-            films: list[FilmNoBytesWithAverage] = [FilmNoBytesWithAverage(**film) for film in cursor.fetchall()]
+            films: list[FilmNoBytesWithAverage] = [
+                FilmNoBytesWithAverage(**film) for film in cursor.fetchall()
+            ]
         logging.info(f"Retrieved all films")
         self.connection_pool.putconn(connection)
         return films
@@ -565,8 +578,7 @@ class DatabaseAccess:
                     )
                 )
             )
-
-        for i in range(500):
+        for i in range(111420, 111450):
             self.insert_indexed(
                 IndexedIn(
                     title=f"Downloadable Film #{i}",
@@ -576,6 +588,6 @@ class DatabaseAccess:
                     ),
                     thumbnail=b"this is a thumbnail",
                     url=f"https://www.pornhub.com/view_video.php?viewkey={i}",
-                    film_id=i
+                    film_id=i,
                 )
             )

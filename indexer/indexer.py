@@ -18,9 +18,11 @@ from rich import print
 from beartype import beartype
 import re
 
+
 @beartype
 def build_url(film_id: int) -> str:
     return f"https://hqporner.com/hdporn/{film_id}.html"
+
 
 @beartype
 def index(film_id: int) -> IndexedIn:
@@ -36,14 +38,16 @@ def index(film_id: int) -> IndexedIn:
     )  # get the document from the iframe source
     poster = get_poster(iframe_document)
     thumbnail = generate_thumbnail(poster)
-
-    return IndexedIn(
+    indexed: IndexedIn = IndexedIn(
         film_id=film_id,
         title=title,
         actresses=actresses,
         thumbnail=thumbnail,
         url=url,
     )
+    logging.info(f"Indexed film {film_id}")
+    return indexed
+
 
 @beartype
 def extract_film_id(url: str) -> int:
@@ -54,7 +58,6 @@ def extract_film_id(url: str) -> int:
 class Indexer:
     def __init__(self, databaseAccess: DatabaseAccess):
         self.db = databaseAccess
-       
 
     def main_loop(
         self,
@@ -70,11 +73,11 @@ class Indexer:
                 3. wait for an hour
             """
             time.sleep(3)
-            urls: list[str] = collect_urls(get_document("https://hqporner.com/hdporn/1"))
-            
+            urls: list[str] = collect_urls(
+                get_document("https://hqporner.com/hdporn/1")
+            )
+
             for url in urls:
                 film_id: int = extract_film_id(url)
-                if self.db.is_indexed(film_id):
-                    print(f"{film_id} Already indexed")
-                else:
-                    print(f"{film_id} not indexed")
+                if not self.db.is_indexed(film_id):
+                    self.db.insert_indexed(index(film_id))

@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from beartype import beartype
+import logging 
 
 
 @beartype
@@ -12,4 +13,5 @@ def collect_urls(document: BeautifulSoup) -> list[str]:
 
     for box in content_boxes:
         urls.append(box.find("a", href=True, class_="featured")['href'])
+    logging.info(f"Collected {len(urls)} urls")
     return urls
