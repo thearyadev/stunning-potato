@@ -229,6 +229,25 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
         return indexed
 
+    def is_indexed(self, film_id) -> bool:
+        """Checks if a film_id is already indexed
+
+        Args:
+            film_id (_type_): film id to check
+
+        Returns:
+            bool: result
+        """
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT uuid FROM indexed WHERE film_id = %s", (film_id,)
+            )
+            result: bool = bool(cursor.fetchone())
+        self.connection_pool.putconn(connection)
+        return result
+
+
     def get_page_indexed(self) -> list[Indexed]:
         """This method will be used to get a page of indexed items. TBI"""
         ...

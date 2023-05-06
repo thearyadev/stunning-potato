@@ -15,12 +15,14 @@ from util.scraper.list_page import collect_urls
 from util.models.indexed import IndexedIn
 import time
 from rich import print
+from beartype import beartype
+import re
 
-
+@beartype
 def build_url(film_id: int) -> str:
     return f"https://hqporner.com/hdporn/{film_id}.html"
 
-
+@beartype
 def index(film_id: int) -> IndexedIn:
     url = build_url(film_id)  # build url from film_id
     document = get_document(url)  # get the document from the url
@@ -43,11 +45,16 @@ def index(film_id: int) -> IndexedIn:
         url=url,
     )
 
+@beartype
+def extract_film_id(url: str) -> int:
+    return int(re.search("(\d+)", url).group(1))
 
+
+@beartype
 class Indexer:
     def __init__(self, databaseAccess: DatabaseAccess):
         self.db = databaseAccess
-        print(collect_urls(get_document("https://hqporner.com/")))
+       
 
     def main_loop(
         self,
@@ -62,4 +69,12 @@ class Indexer:
                     2.3. if it is not, begin indexing
                 3. wait for an hour
             """
-            break
+            time.sleep(3)
+            urls: list[str] = collect_urls(get_document("https://hqporner.com/hdporn/1"))
+            
+            for url in urls:
+                film_id: int = extract_film_id(url)
+                if self.db.is_indexed(film_id):
+                    print(f"{film_id} Already indexed")
+                else:
+                    print(f"{film_id} not indexed")

@@ -9,14 +9,14 @@
 
 
 
-# from indexer.indexer import Indexer
+from indexer.indexer import Indexer
 from util.database.database_access import DatabaseAccess
 from pathlib import Path
 
 db = DatabaseAccess("lewdlocale", "lewdlocale", "lewdlocale", "localhost", 5432)
 db.drop()
 db.initialize(Path("util/database/tables.sql"))
-db.populate_demo_data()
-# indexer = Indexer(databaseAccess=db)
-# indexer.main_loop()
+# db.populate_demo_data()
+indexer = Indexer(databaseAccess=db)
+indexer.main_loop()
 
