@@ -50,7 +50,9 @@ def get_film_actresses(document: BeautifulSoup) -> list[str]:
     Returns:
         list[str]:  actresses
     """
-    return [a.text for a in document.find("li", class_="fa-star-o").find_all("a")]
+    actresses: list[str] = [a.text for a in document.find("li", class_="fa-star-o").find_all("a")]
+    logging.info(f"Parsed Film Actresses {actresses}")
+    return actresses
 
 
 def get_film_duration(document: BeautifulSoup) -> timedelta:
@@ -73,6 +75,7 @@ def get_film_duration(document: BeautifulSoup) -> timedelta:
                 delta += timedelta(minutes=int(component[:-1]))
             case "s":
                 delta += timedelta(seconds=int(component[:-1]))
+    logging.info(f"Parsed Film Duration {time_text} to {delta}")
     return delta
 
 
@@ -91,7 +94,9 @@ def get_iframe_source(document: BeautifulSoup) -> str:
     iframes = document.find_all("iframe")
     for frame in iframes:
         if frame["src"] not in IFRAME_BLACKLIST:
-            return parse_url(frame["src"])
+            url: str = parse_url(frame["src"])
+            logging.info(f"Found iframe source {url}")
+            return url
     raise ValueError("No iframe found")
 
 
@@ -109,6 +114,7 @@ def get_poster(document: BeautifulSoup) -> bytes:
     if poster_url_search:
         poster_url = parse_url(poster_url_search.group(0))
         poster_url = urllib.parse.urljoin(poster_url, "main.jpg")
+    logging.info(f"Poster url found {poster_url}... Downloading.")
     return requests.get(poster_url).content
 
 def get_download_url(document: BeautifulSoup) -> bytes:
@@ -125,6 +131,7 @@ def get_download_url(document: BeautifulSoup) -> bytes:
     if download_url_search:
         download_url = parse_url(download_url_search.group(0))
         download_url = urllib.parse.urljoin(download_url, "1080.mp4")
+    logging.info(f"Download url found {download_url}")
     return download_url
 
 def generate_thumbnail(poster: bytes) -> bytes:
@@ -139,4 +146,5 @@ def generate_thumbnail(poster: bytes) -> bytes:
     with BytesIO(poster) as f:
         image = Image.open(f)
         image.thumbnail((400, 225))
+        logging.info("Thumbnail generated")
         return image.tobytes()
