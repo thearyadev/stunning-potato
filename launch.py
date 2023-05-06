@@ -1,13 +1,14 @@
 import logging
-from util.scraper.document import (
-    get_document,
+from util.scraper.detail_page import (
     get_film_title,
     get_film_actresses,
     get_film_duration,
     get_iframe_source,
     get_poster,
     get_download_url,
+    generate_thumbnail
 )
+from util.scraper.document import get_document
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,8 +22,7 @@ iframe_src = get_iframe_source(doc)
 iframe_doc = get_document(iframe_src)
 poster = get_poster(iframe_doc)
 video_url = get_download_url(iframe_doc)
-print(video_url)
-
+thumbnail = generate_thumbnail(poster)
 
 """
 Scraper
