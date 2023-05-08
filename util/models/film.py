@@ -26,6 +26,25 @@ class FilmIn:
     poster: bytes
     download_progress: int
 
+    def __repr__(
+        self,
+    ) -> str:
+        return (
+            "FilmIn(title=%s, duration=%s, date_added=%s, filename=%s, watched=%s, state=%s,"
+            "actresses=%s, rating=%s, thumbnail=%s, poster=%s, download_progress=%s)"
+            % (
+                self.title,
+                self.duration,
+                self.date_added,
+                self.filename,
+                self.watched,
+                self.state,
+                self.actresses,
+                self.rating,
+                self.download_progress,
+            )
+        )
+
 
 @dataclass
 class Film:
@@ -43,6 +62,26 @@ class Film:
     poster: bytes | memoryview
     download_progress: int
 
+    def __repr__(
+        self,
+    ) -> str:
+        return (
+            "FilmIn(uuid=%s, title=%s, duration=%s, date_added=%s, filename=%s, watched=%s, state=%s,"
+            "actresses=%s, rating=%s, thumbnail=%s, poster=%s, download_progress=%s)"
+            % (
+                self.uuid,
+                self.title,
+                self.duration,
+                self.date_added,
+                self.filename,
+                self.watched,
+                self.state,
+                self.actresses,
+                self.rating,
+                self.download_progress,
+            )
+        )
+
 
 @dataclass
 class FilmNoBytes:
@@ -55,7 +94,27 @@ class FilmNoBytes:
     state: FilmStateEnum
     actresses: list[str]
     rating: UUID
+    download_progress: int
 
+    def __repr__(
+        self,
+    ) -> str:
+        return (
+            "FilmIn(uuid=%s, title=%s, duration=%s, date_added=%s, filename=%s, watched=%s, state=%s,"
+            "actresses=%s, rating=%s, thumbnail=%s, poster=%s, download_progress=%s)"
+            % (
+                self.uuid,
+                self.title,
+                self.duration,
+                self.date_added,
+                self.filename,
+                self.watched,
+                self.state,
+                self.actresses,
+                self.rating,
+                self.download_progress,
+            )
+        )
 
 @dataclass
 class FilmNoBytesWithAverage:
