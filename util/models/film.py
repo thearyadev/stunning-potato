@@ -31,7 +31,7 @@ class FilmIn:
     ) -> str:
         return (
             "FilmIn(title=%s, duration=%s, date_added=%s, filename=%s, watched=%s, state=%s,"
-            "actresses=%s, rating=%s, thumbnail=%s, poster=%s, download_progress=%s)"
+            "actresses=%s, rating=%s, download_progress=%s)"
             % (
                 self.title,
                 self.duration,
@@ -66,8 +66,8 @@ class Film:
         self,
     ) -> str:
         return (
-            "FilmIn(uuid=%s, title=%s, duration=%s, date_added=%s, filename=%s, watched=%s, state=%s,"
-            "actresses=%s, rating=%s, thumbnail=%s, poster=%s, download_progress=%s)"
+            "Film(uuid=%s, title=%s, duration=%s, date_added=%s, filename=%s, watched=%s, state=%s,"
+            "actresses=%s, rating=%s, download_progress=%s)"
             % (
                 self.uuid,
                 self.title,
@@ -100,8 +100,8 @@ class FilmNoBytes:
         self,
     ) -> str:
         return (
-            "FilmIn(uuid=%s, title=%s, duration=%s, date_added=%s, filename=%s, watched=%s, state=%s,"
-            "actresses=%s, rating=%s, thumbnail=%s, poster=%s, download_progress=%s)"
+            "FilmNoBytes(uuid=%s, title=%s, duration=%s, date_added=%s, filename=%s, watched=%s, state=%s,"
+            "actresses=%s, rating=%s, download_progress=%s)"
             % (
                 self.uuid,
                 self.title,
@@ -116,6 +116,7 @@ class FilmNoBytes:
             )
         )
 
+
 @dataclass
 class FilmNoBytesWithAverage:
     uuid: UUID
@@ -129,3 +130,24 @@ class FilmNoBytesWithAverage:
     actresses: list[str]
     rating: UUID
     average: float
+
+    def __repr__(
+        self,
+    ) -> str:
+        return (
+            "FilmNoBytesWithAverage(uuid=%s, title=%s, duration=%s, date_added=%s, filename=%s, watched=%s, state=%s,"
+            "actresses=%s, rating=%s, download_progress=%s, average=%s)"
+            % (
+                self.uuid,
+                self.title,
+                self.duration,
+                self.date_added,
+                self.filename,
+                self.watched,
+                self.state,
+                self.actresses,
+                self.rating,
+                self.download_progress,
+                self.average
+            )
+        )

@@ -56,8 +56,10 @@ def extract_film_id(url: str) -> int:
 
 @beartype
 class Indexer:
-    def __init__(self, databaseAccess: DatabaseAccess):
+    def __init__(self, databaseAccess: DatabaseAccess, *, sleep_time: int = 15, iterator_sleep_time: int = 1):
         self.db = databaseAccess
+        self.sleep_time = sleep_time
+        self.iterator_sleep_time = iterator_sleep_time
 
     def main_loop(
         self,
@@ -72,12 +74,17 @@ class Indexer:
                     2.3. if it is not, begin indexing
                 3. wait for an hour
             """
-            time.sleep(3)
+            
             urls: list[str] = collect_urls(
                 get_document("https://hqporner.com/hdporn/1")
             )
 
             for url in urls:
+                time.sleep(self.iterator_sleep_time)
                 film_id: int = extract_film_id(url)
                 if not self.db.is_indexed(film_id):
                     self.db.insert_indexed(index(film_id))
+                else:
+                    logging.info(f"Film {film_id} already indexed. Skipping.")
+            logging.info("Sleeping for 15 seconds...")
+            time.sleep(self.sleep_time)

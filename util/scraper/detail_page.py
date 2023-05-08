@@ -42,7 +42,7 @@ def get_film_title(document: BeautifulSoup) -> str:
     Returns:
         str: film title
     """
-    return document.find("h1", class_="main-h1").text.title()
+    return document.find("h1", class_="main-h1").text.title().strip()
 
 
 @beartype
