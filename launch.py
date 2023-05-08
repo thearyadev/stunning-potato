@@ -1,5 +1,6 @@
 import argparse
 from indexer.indexer import Indexer
+from downloader.downloader import Downloader
 from util.database.database_access import DatabaseAccess
 from pathlib import Path
 import logging
@@ -26,8 +27,8 @@ if args.flush == "True":
 
 match args.app:
     case "server":
-        exit()
+        exit() # start with waitress or uvicorn
     case "downloader":
-        exit()
+        Downloader(databaseAccess=db).main_loop()
     case "indexer":
-        indexer = Indexer(databaseAccess=db)
+        Indexer(databaseAccess=db).main_loop()
