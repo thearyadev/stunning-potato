@@ -129,14 +129,14 @@ def get_poster(document: BeautifulSoup) -> bytes:
 
 
 @beartype
-def get_download_url(document: BeautifulSoup) -> bytes:
+def get_download_url(document: BeautifulSoup) -> str:
     """Get download url from document. Document MUST be iframe document
 
     Args:
         document (BeautifulSoup): iframe document
 
     Returns:
-        bytes: download url
+        str: download url
     """
     all_script_tags = str(document.find_all("script"))
     download_url_search = re.search("\/\S+\.mp4", all_script_tags)

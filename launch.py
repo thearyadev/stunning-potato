@@ -22,7 +22,7 @@ db.initialize(Path("./util/database/tables.sql"))
 if args.flush == "True":
     db.drop()
     db.initialize(Path("./util/database/tables.sql"))
-
+    db.populate_demo_data()
 
 
 match args.app:

@@ -412,6 +412,23 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
         return poster_bytes
 
+    def set_film_state(self, uuid: UUID, new_state: FilmStateEnum):
+        """Sets the state of a film
+
+        Args:
+            uuid (UUID): film uuid
+            new_state (FilmStateEnum): new state
+        """
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE film SET state = %s WHERE uuid = %s",
+                (new_state, uuid),
+            )
+            connection.commit()
+        logging.info(f"Set film {uuid} state to {new_state}")
+        self.connection_pool.putconn(connection)
+
     ## QUEUE
 
     def insert_queue(self, queue: QueueIn) -> Queue:
