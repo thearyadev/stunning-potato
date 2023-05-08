@@ -513,12 +513,7 @@ class DatabaseAccess:
             cursor.execute('DROP EXTENSION IF EXISTS "uuid-ossp" CASCADE;')
             cursor.execute("DROP TYPE IF EXISTS film_state")
             cursor.execute("DROP TABLE IF EXISTS indexed CASCADE;")
-            if input("ENTER Y TO RESET DATABASE: ") == "y":
-                logging.warning("DROPPING DATABASE")
-                connection.commit()
-            else:
-                logging.warning("NOT DROPPING DATABASE")
-                connection.rollback()
+            connection.commit()
         self.connection_pool.putconn(connection)
 
     def populate_demo_data(self):

@@ -66,13 +66,12 @@ class Indexer:
     ):
         while True:
             """
-            Once every hour:
                 1. get all urls from the first page of the site
                 2. for each url:
                     2.1. parse the url and get the film_id
                     2.2. check if the film_id is already in the database
                     2.3. if it is not, begin indexing
-                3. wait for an hour
+                3. wait for an a bit
             """
             
             urls: list[str] = collect_urls(
