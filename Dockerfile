@@ -1,3 +1,9 @@
-FROM --platform=arm64 golang:1.16.5-alpine3.13
+FROM python:3.11.3-slim-buster
+ARG SERVICE
 
-COPY . . 
+COPY . .
+
+RUN pip install poetry==1.3.2
+RUN poetry install
+
+ENTRYPOINT "poetry run launch.py --app ${SERVICE} --flush False"

@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  downloader:
+    build: .
+    args: 
+      SERVICE: downloader
+  
+  indxer:
+    build: .
+    args: 
+      SERVICE: indexer
+  
+  
