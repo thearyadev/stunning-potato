@@ -582,7 +582,7 @@ class DatabaseAccess:
                         thumbnail=b"this is a thumbnail",
                         poster=b"this is a poster",
                         download_progress=random.randint(0, 100),
-                        filename=f"film_number_{i * random.randint(1, 20)}",
+                        filename=f"film_number_{i * random.randint(1, 20)}.mp4",
                         actresses=random.sample(
                             list_of_porn_actresses, random.randint(1, 3)
                         ),
@@ -603,3 +603,13 @@ class DatabaseAccess:
                     film_id=i,
                 )
             )
+    def set_film_progress(self, newProgress: int, film_uuid: UUID):
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE film SET download_progress = %s WHERE uuid = %s",
+                (newProgress, film_uuid),
+            )
+            connection.commit()
+        logging.info(f"Updated download progress for film {film_uuid} to {newProgress}")
+        self.connection_pool.putconn(connection)
