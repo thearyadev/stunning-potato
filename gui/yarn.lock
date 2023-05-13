@@ -8822,7 +8822,7 @@ __metadata:
     lint-staged: ^11.0.0
     moment: 2.29.1
     mousetrap: ^1.6.5
-    prettier: ^2.3.1
+    prettier: 2.3.1
     prop-types: ^15.7.2
     rc-slider: ^9.7.2
     rc-switch: ^3.2.2
@@ -13852,7 +13852,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.3.1":
+"prettier@npm:2.3.1":
   version: 2.3.1
   resolution: "prettier@npm:2.3.1"
   bin:

@@ -54,7 +54,10 @@
     "no-console": "off",
     "react/prop-types": 0,
     "prettier/prettier": [
-      "warn"
+      "off"
+    ],
+    "no-unused-vars": [
+      "off"
     ]
   },
   "globals": {

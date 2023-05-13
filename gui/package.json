@@ -16,6 +16,7 @@
     "formik": "^2.2.9",
     "moment": "2.29.1",
     "mousetrap": "^1.6.5",
+    "prettier": "2.3.1",
     "prop-types": "^15.7.2",
     "rc-slider": "^9.7.2",
     "rc-switch": "^3.2.2",
@@ -90,7 +91,6 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",
     "husky": "^6.0.0",
-    "lint-staged": "^11.0.0",
-    "prettier": "^2.3.1"
+    "lint-staged": "^11.0.0"
   }
 }

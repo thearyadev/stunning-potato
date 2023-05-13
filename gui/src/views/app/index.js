@@ -4,15 +4,13 @@ import { connect } from 'react-redux';
 
 import AppLayout from 'layout/AppLayout';
 
-const Gogo = React.lazy(() =>
-  import(/* webpackChunkName: "viwes-gogo" */ './gogo')
+const Cinema = React.lazy(() =>
+  import(/* webpackChunkName: "viwes-gogo" */ './cinema')
 );
-const SecondMenu = React.lazy(() =>
-  import(/* webpackChunkName: "viwes-second-menu" */ './second-menu')
+const Nouvelle = React.lazy(() =>
+  import(/* webpackChunkName: "viwes-second-menu" */ './nouvelle')
 );
-const BlankPage = React.lazy(() =>
-  import(/* webpackChunkName: "viwes-blank-page" */ './blank-page')
-);
+
 
 const App = ({ match }) => {
   return (
@@ -20,19 +18,17 @@ const App = ({ match }) => {
       <div className="dashboard-wrapper">
         <Suspense fallback={<div className="loading" />}>
           <Switch>
-            <Redirect exact from={`${match.url}/`} to={`${match.url}/gogo`} />
+            {/* redirects / to /<endpoint> */}
+            <Redirect exact from={`${match.url}/`} to={`${match.url}/cinema`} />
             <Route
-              path={`${match.url}/gogo`}
-              render={(props) => <Gogo {...props} />}
+              path={`${match.url}/cinema`}
+              render={(props) => <Cinema {...props} />}
             />
             <Route
-              path={`${match.url}/second-menu`}
-              render={(props) => <SecondMenu {...props} />}
+              path={`${match.url}/nouvelle`}
+              render={(props) => <Nouvelle {...props} />}
             />
-            <Route
-              path={`${match.url}/blank-page`}
-              render={(props) => <BlankPage {...props} />}
-            />
+            {/* if no route is matched, go to error.  */}
             <Redirect to="/error" />
           </Switch>
         </Suspense>

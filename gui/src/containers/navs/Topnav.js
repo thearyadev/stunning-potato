@@ -219,92 +219,12 @@ const TopNav = ({
           <MobileMenuIcon />
         </NavLink>
 
-        <div className="search">
-          <Input
-            name="searchKeyword"
-            id="searchKeyword"
-            placeholder={messages['menu.search']}
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-            onKeyPress={(e) => handleSearchInputKeyPress(e)}
-          />
-          <span
-            className="search-icon"
-            onClick={(e) => handleSearchIconClick(e)}
-          >
-            <i className="simple-icon-magnifier" />
-          </span>
-        </div>
-
-        <div className="d-inline-block">
-          <UncontrolledDropdown className="ml-2">
-            <DropdownToggle
-              caret
-              color="light"
-              size="sm"
-              className="language-button"
-            >
-              <span className="name">{locale.toUpperCase()}</span>
-            </DropdownToggle>
-            <DropdownMenu className="mt-3" right>
-              {localeOptions.map((l) => {
-                return (
-                  <DropdownItem
-                    onClick={() => handleChangeLocale(l.id, l.direction)}
-                    key={l.id}
-                  >
-                    {l.name}
-                  </DropdownItem>
-                );
-              })}
-            </DropdownMenu>
-          </UncontrolledDropdown>
-        </div>
       </div>
       <NavLink className="navbar-logo" to={adminRoot}>
-        <span className="logo d-none d-xs-block" />
+        <span className="logo d-none d-xs-block h-100" />
         <span className="logo-mobile d-block d-xs-none" />
       </NavLink>
 
-      <div className="navbar-right">
-        {isDarkSwitchActive && <TopnavDarkSwitch />}
-        <div className="header-icons d-inline-block align-middle">
-          <TopnavEasyAccess />
-          <TopnavNotifications />
-          <button
-            className="header-icon btn btn-empty d-none d-sm-inline-block"
-            type="button"
-            id="fullScreenButton"
-            onClick={toggleFullScreen}
-          >
-            {isInFullScreen ? (
-              <i className="simple-icon-size-actual d-block" />
-            ) : (
-              <i className="simple-icon-size-fullscreen d-block" />
-            )}
-          </button>
-        </div>
-        <div className="user d-inline-block">
-          <UncontrolledDropdown className="dropdown-menu-right">
-            <DropdownToggle className="p-0" color="empty">
-              <span className="name mr-1">Sarah Kortney</span>
-              <span>
-                <img alt="Profile" src="/assets/img/profiles/l-1.jpg" />
-              </span>
-            </DropdownToggle>
-            <DropdownMenu className="mt-3" right>
-              <DropdownItem>Account</DropdownItem>
-              <DropdownItem>Features</DropdownItem>
-              <DropdownItem>History</DropdownItem>
-              <DropdownItem>Support</DropdownItem>
-              <DropdownItem divider />
-              <DropdownItem onClick={() => handleLogout()}>
-                Sign out
-              </DropdownItem>
-            </DropdownMenu>
-          </UncontrolledDropdown>
-        </div>
-      </div>
     </nav>
   );
 };
