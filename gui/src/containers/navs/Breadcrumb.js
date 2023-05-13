@@ -22,7 +22,6 @@ const BreadcrumbContainer = ({ heading, match }) => {
           <IntlMessages id={heading} />
         </h1>
       )}
-      <BreadcrumbItems match={match} />
     </>
   );
 };

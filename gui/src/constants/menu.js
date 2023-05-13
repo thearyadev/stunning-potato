@@ -11,8 +11,14 @@ const data = [
   {
     id: 'catalogue',
     icon: 'simple-icon-map',
-    label: 'Nouvelle',
+    label: 'nouvelle',
     to: `${adminRoot}/nouvelle`,
+  },
+  {
+    id: 'actresses',
+    icon: 'simple-icon-symbol-female',
+    label: 'actrices',
+    to: `${adminRoot}/actrices`,
   },
 ];
 export default data;

@@ -12,59 +12,24 @@ function collect(props) {
 
 const ListPageListing = ({
   items,
-  displayMode,
   selectedItems,
   onCheckItem,
-  currentPage,
-  totalPage,
-  onContextMenuClick,
-  onContextMenu,
-  onChangePage,
+
 }) => {
   return (
     <Row>
-      {items.map((product) => {
-        if (displayMode === 'imagelist') {
-          return (
-            <ImageListView
-              key={product.id}
-              product={product}
-              isSelect={selectedItems.includes(product.id)}
-              collect={collect}
-              onCheckItem={onCheckItem}
-            />
-          );
-        }
-        if (displayMode === 'thumblist') {
-          return (
-            <ThumbListView
-              key={product.id}
-              product={product}
-              isSelect={selectedItems.includes(product.id)}
-              collect={collect}
-              onCheckItem={onCheckItem}
-            />
-          );
-        }
+      {items.map((film) => {
         return (
-          <DataListView
-            key={product.id}
-            product={product}
-            isSelect={selectedItems.includes(product.id)}
-            onCheckItem={onCheckItem}
+          <ImageListView
+            key={film.id}
+            film={film}
+            isSelect={selectedItems.includes(film.id)}
             collect={collect}
+            onCheckItem={onCheckItem}
           />
         );
       })}
-      <Pagination
-        currentPage={currentPage}
-        totalPage={totalPage}
-        onChangePage={(i) => onChangePage(i)}
-      />
-      <ContextMenuContainer
-        onContextMenuClick={onContextMenuClick}
-        onContextMenu={onContextMenu}
-      />
+      
     </Row>
   );
 };
