@@ -24,7 +24,7 @@ class Server:
         self.app.include_router(self.router)
 
     def main_loop(self):
-        uvicorn.run(self.app, host="0.0.0.0", port=8000)
+        uvicorn.run(self.app, port=8000)
 
     def get_actresses(self) -> list[str]:
         return self.db.get_all_actresses()

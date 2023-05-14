@@ -359,8 +359,10 @@ class Sidebar extends Component {
           <div className="scroll">
             <PerfectScrollbar
               options={{ suppressScrollX: true, wheelPropagation: false }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              
             >
-              <Nav vertical className="list-unstyled">
+              <Nav vertical className="list-unstyled" id="side-nav">
                 {menuItems &&
                   this.filteredList(menuItems).map((item) => {
                     return (

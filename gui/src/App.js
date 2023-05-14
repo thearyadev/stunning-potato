@@ -8,6 +8,9 @@ import {
   Redirect,
 } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
+import { fetchActresses } from 'redux/actresses/actions';
+import { fetchFilms } from 'redux/films/actions';
+
 import AppLocale from './lang';
 import ColorSwitcher from './components/common/ColorSwitcher';
 import { NotificationContainer } from './components/common/react-notifications';
@@ -38,6 +41,13 @@ class App extends React.Component {
     }
   }
 
+  componentDidMount() {
+    const { FetchActresses, FetchFilms } = this.props;
+    FetchActresses();
+    FetchFilms();
+
+  }
+
   render() {
     const { locale } = this.props;
     const currentAppLocale = AppLocale[locale];
@@ -62,11 +72,12 @@ class App extends React.Component {
                     exact
                     render={(props) => <ViewError {...props} />}
                   />
-                  
+                  {/* redirects / to cinema page */}
+
+                  <Redirect exact from="/" to={`${adminRoot}/cinema`} />
+
                   <Redirect to="/error" />
-                  {/*
-                  <Redirect exact from="/" to={adminRoot} />
-                  */}
+
                   <Redirect to="/error" />
                 </Switch>
               </Router>
@@ -82,6 +93,11 @@ const mapStateToProps = ({ settings }) => {
   const { locale } = settings;
   return { locale };
 };
-const mapActionsToProps = {};
+const mapActionsToProps = (dispatch) => {
+  return {
+    FetchActresses: () => dispatch(fetchActresses()),
+    FetchFilms: () => dispatch(fetchFilms()),
+  }
+};
 
 export default connect(mapStateToProps, mapActionsToProps)(App);

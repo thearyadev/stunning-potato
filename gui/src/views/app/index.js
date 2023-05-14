@@ -3,6 +3,8 @@ import { Route, withRouter, Switch, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { useSelector } from 'react-redux';
 import AppLayout from 'layout/AppLayout';
+import { adminRoot } from 'constants/defaultValues';
+import {useState, useEffect} from 'react';
 
 const Cinema = React.lazy(() =>
   import(/* webpackChunkName: "viwes-gogo" */ './cinema')
@@ -13,29 +15,45 @@ const Nouvelle = React.lazy(() =>
 
 
 const App = ({ match }) => {
+  const films = useSelector((state) => state.films.films);
+  const [showRoutes, setShowRoutes] = useState(false);
+
+  useEffect(() => {
+    // Show the routes after 2 seconds
+    const timerId = setTimeout(() => {
+      setShowRoutes(true);
+    }, 1);
+
+    // Clear the timer if the component is unmounted before it finishes
+    return () => clearTimeout(timerId);
+  }, []);
+
   return (
     <AppLayout>
       <div className="dashboard-wrapper">
-        <Suspense fallback={<div className="loading" />}>
-          <Switch>
-            {/* redirects / to /<endpoint> */}
-            <Redirect exact from={`${match.url}/`} to={`${match.url}/cinema`} />
-            <Route
-              path={`${match.url}/cinema`}
-              render={(props) => <Cinema {...props} />}
-            />
-            <Route
-              path={`${match.url}/nouvelle`}
-              render={(props) => <Nouvelle {...props} />}
-            />
-            {/* if no route is matched, go to error.  */}
-            <Redirect to="/error" />
-          </Switch>
-        </Suspense>
+        {showRoutes ? (
+          <Suspense fallback={<div className="loading" />}>
+            <Switch>
+              {/* redirects / to /<endpoint> */}
+              <Route
+                path={`${match.url}/cinema`}
+                render={(props) => <Cinema {...props} />}
+              />
+              <Route
+                path={`${match.url}/nouvelle`}
+                render={(props) => <Nouvelle {...props} />}
+              />
+              {/* if no route is matched, go to error.  */}
+            </Switch>
+          </Suspense>
+        ) : (
+          <div className="loading" />
+        )}
       </div>
     </AppLayout>
   );
 };
+
 
 const mapStateToProps = ({ menu }) => {
   const { containerClassnames } = menu;

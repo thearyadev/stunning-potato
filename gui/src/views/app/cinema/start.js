@@ -6,36 +6,41 @@ import Breadcrumb from 'containers/navs/Breadcrumb';
 import ListPageListing from 'containers/pages/ListPageListing';
 import ListPageHeading from 'containers/pages/ListPageHeading';
 import { DropdownToggle, DropdownItem, DropdownMenu, ButtonDropdown } from 'reactstrap';
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchActresses, setActresses } from 'redux/actresses/actions';
+import {Button} from 'reactstrap';
 
-const items = [
-  {
-    "uuid": 18,
-    "title": "sexy time 1",
-    // this is temp
-    "img": "http://xxx.elfie.local/films/ts?id=159",
-    "actresses": ["Aria Valencia", "Kenzie Love"],
-    "date": "May 5, 2023",
-    "watched": false,
-    "state": "COMPLETE",
-    "rating": 9.7
-  },
-
+const sortingOptions = [
+  {value: "DANF", label: "Date Added (Newest First)"},
+  {value: "DAOF", label: "Date Added (Oldest First)"},
+  {value: "UW", label: "Unwatched"},
+  {value: "W", label: "Watched"},
+  {value: "RATING", label: "Rating"},
+  {value: "STORY", label: "Story"},
+  {value: "POSITIONS", label: "Positions"},
+  {value: "PUSSY", label: "Pussy"},
+  {value: "SHOTS", label: "Shots"},
+  {value: "HAIR", label: "Hair"},
+  {value: "BOOBS", label: "Boobs"},
+  {value: "BUTT", label: "Butt"},
+  {value: "FACE", label: "Face"},
+  {value: "REAR", label: "Rear View"},
+  {valueL: "DL", label: "Downloading"}
 ]
 
-for (let i = 0; i < 5; i += 1) {
-  items.push(...items)
-}
+
 
 
 const Start = ({ match }) => {
   const [sortingDropdownOpen, setSortingDropdownOpen] = useState(false);
   const toggleSortingDropdown = () => setSortingDropdownOpen(!sortingDropdownOpen)
+  const films = useSelector(state => state.films.films);
 
+  const sort = (method) => {
 
-  const number = useSelector(state => state.library.number);
-  console.log(number)
+  }
+
   return <>
     <Row>
       <Colxx xxs="12">
@@ -49,12 +54,11 @@ const Start = ({ match }) => {
             <IntlMessages id="classement" />
           </DropdownToggle>
           <DropdownMenu>
-            <DropdownItem>
-              <IntlMessages id="dropdowns.another-action" />
-            </DropdownItem>
-            <DropdownItem>
-              <IntlMessages id="dropdowns.another-action" />
-            </DropdownItem>
+            {sortingOptions.map( (item) => (
+              <DropdownItem key={item.value}>
+                <IntlMessages id={item.label} />
+              </DropdownItem>
+            ))}
           </DropdownMenu>
         </ButtonDropdown>
 
@@ -68,7 +72,7 @@ const Start = ({ match }) => {
 
         {/* this is the video library  */}
         <ListPageListing
-          items={items}
+          items={films}
           displayMode={"imagelist"}
           selectedItems={[]}
           onCheckItem={() => { }}
