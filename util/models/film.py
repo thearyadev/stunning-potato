@@ -1,8 +1,7 @@
+from dataclasses import dataclass
 from datetime import date, timedelta
 from enum import Enum
 from uuid import UUID
-
-from dataclasses import dataclass
 
 
 class FilmStateEnum(str, Enum):
@@ -148,6 +147,6 @@ class FilmNoBytesWithAverage:
                 self.actresses,
                 self.rating,
                 self.download_progress,
-                self.average
+                self.average,
             )
         )

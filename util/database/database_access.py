@@ -1,25 +1,24 @@
 import logging
 import random
+from datetime import date, timedelta
 from pathlib import Path
 from uuid import UUID
 
 import psycopg2
+from beartype import beartype
 from psycopg2 import pool
-from psycopg2.extras import DictCursor
-from psycopg2.extras import UUID_adapter
-from psycopg2.extras import register_uuid
+from psycopg2.extras import DictCursor, UUID_adapter, register_uuid
+
 from util.models.film import (
     Film,
     FilmIn,
     FilmNoBytes,
-    FilmStateEnum,
     FilmNoBytesWithAverage,
+    FilmStateEnum,
 )
 from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
-from datetime import date, timedelta
-from beartype import beartype
 
 
 @beartype
@@ -75,7 +74,13 @@ class DatabaseAccess:
         Returns:
             list[Actress]: list of actress out objects
         """
-        ...
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT unnest(actresses) as name FROM film")
+            raw_data_queried: list[tuple[str]] = cursor.fetchall()
+            actresses: list[str] = [actress[0] for actress in raw_data_queried]
+        self.connection_pool.putconn(connection)
+        return actresses
 
     ## RATING
 
@@ -218,7 +223,7 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
         return indexed
 
-    def get_indexed_no_bytes(self, uuid: UUID) -> IndexedNoBytes:
+    def get_indexed_no_bytes(self, uuid: UUID) -> IndexedNoBytes | None:
         """Given a indexed uuid, returns the indexed object
 
         Args:
@@ -364,7 +369,7 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
         return film
 
-    def get_film_thumbnail(self, uuid: UUID) -> bytes:
+    def get_film_thumbnail(self, uuid: UUID) -> bytes | None:
         """gets the thumbnail for a film
 
         Args:
@@ -388,7 +393,7 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
         return thumbnail_bytes
 
-    def get_film_poster(self, uuid: UUID) -> bytes:
+    def get_film_poster(self, uuid: UUID) -> bytes | None:
         """gets poster for a film
 
         Args:
@@ -566,30 +571,34 @@ class DatabaseAccess:
         films: list[Film] = []
 
         for i in range(len(ratings)):
-            films.append(
-                self.insert_film(
-                    FilmIn(
-                        title=f"sexy time {i + 1}",
-                        duration=timedelta(seconds=random.randint(500, 5000)),
-                        date_added=date(2022, 4, 22)
-                        + timedelta(
-                            days=random.randint(
-                                0, (date(2023, 4, 22) - date(2022, 4, 22)).days
-                            )
-                        ),
-                        watched=random.choice([True, False]),
-                        state=random.choice(list(FilmStateEnum)),
-                        thumbnail=b"this is a thumbnail",
-                        poster=b"this is a poster",
-                        download_progress=random.randint(0, 100),
-                        filename=f"film_number_{i * random.randint(1, 20)}.mp4",
-                        actresses=random.sample(
-                            list_of_porn_actresses, random.randint(1, 3)
-                        ),
-                        rating=ratings[i].uuid,
+            with open("./temp/thumbnail.jpg", "rb") as thumbnail, open(
+                "./temp/poster.jpg", "rb"
+            ) as poster:
+                films.append(
+                    self.insert_film(
+                        FilmIn(
+                            title=f"sexy time {i + 1}",
+                            duration=timedelta(seconds=random.randint(500, 5000)),
+                            date_added=date(2022, 4, 22)
+                            + timedelta(
+                                days=random.randint(
+                                    0, (date(2023, 4, 22) - date(2022, 4, 22)).days
+                                )
+                            ),
+                            watched=random.choice([True, False]),
+                            state=random.choice(list(FilmStateEnum)),
+                            thumbnail=thumbnail.read(),
+                            poster=poster.read(),
+                            download_progress=random.randint(0, 100),
+                            filename=f"film_number_{i * random.randint(1, 20)}.mp4",
+                            actresses=random.sample(
+                                list_of_porn_actresses, random.randint(1, 3)
+                            ),
+                            rating=ratings[i].uuid,
+                        )
                     )
                 )
-            )
+
         for i in range(111420, 111450):
             self.insert_indexed(
                 IndexedIn(
@@ -603,6 +612,7 @@ class DatabaseAccess:
                     film_id=i,
                 )
             )
+
     def set_film_progress(self, newProgress: int, film_uuid: UUID):
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
@@ -613,3 +623,19 @@ class DatabaseAccess:
             connection.commit()
         logging.info(f"Updated download progress for film {film_uuid} to {newProgress}")
         self.connection_pool.putconn(connection)
+
+    def get_single_film_no_bytes(self, uuid: UUID) -> FilmNoBytes | None:
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                "SELECT f.uuid, f.title, f.duration, f.date_added, f.filename, f.watched, f.state, f.download_progress, f.actresses, f.rating FROM film f WHERE f.uuid = %s",
+                (uuid,),
+            )
+            if (query_result := cursor.fetchone()) is not None:
+                filmRetrieved: FilmNoBytes = FilmNoBytes(**query_result)
+            else:
+                filmRetrieved: None = None
+                logging.warning("Attemped to access record that does not exist.")
+        logging.info(f"Retrieved film {filmRetrieved}")
+        self.connection_pool.putconn(connection)
+        return filmRetrieved

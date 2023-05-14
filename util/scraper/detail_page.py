@@ -1,14 +1,15 @@
-from bs4 import BeautifulSoup
-import requests
-import logging
-from datetime import timedelta
 import json
-from pathlib import Path
-import urllib.parse
+import logging
 import re
-from PIL import Image
+import urllib.parse
+from datetime import timedelta
 from io import BytesIO
+from pathlib import Path
+
+import requests
 from beartype import beartype
+from bs4 import BeautifulSoup
+from PIL import Image
 
 IFRAME_BLACKLIST: list[str] = json.loads(
     Path("util/scraper/iframe_url_blacklist.json").read_text()

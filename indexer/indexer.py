@@ -1,10 +1,17 @@
-import requests
 import logging
+import re
+import time
+
+import requests
+from beartype import beartype
+from rich import print
+
 from util.database.database_access import DatabaseAccess
+from util.models.indexed import IndexedIn
 from util.scraper.detail_page import (
+    generate_thumbnail,
     get_download_url,
     get_film_actresses,
-    generate_thumbnail,
     get_film_duration,
     get_film_title,
     get_iframe_source,
@@ -12,11 +19,6 @@ from util.scraper.detail_page import (
 )
 from util.scraper.document import get_document
 from util.scraper.list_page import collect_urls
-from util.models.indexed import IndexedIn
-import time
-from rich import print
-from beartype import beartype
-import re
 
 
 @beartype
@@ -56,7 +58,13 @@ def extract_film_id(url: str) -> int:
 
 @beartype
 class Indexer:
-    def __init__(self, databaseAccess: DatabaseAccess, *, sleep_time: int = 15, iterator_sleep_time: int = 1):
+    def __init__(
+        self,
+        databaseAccess: DatabaseAccess,
+        *,
+        sleep_time: int = 15,
+        iterator_sleep_time: int = 1,
+    ):
         self.db = databaseAccess
         self.sleep_time = sleep_time
         self.iterator_sleep_time = iterator_sleep_time
@@ -66,14 +74,14 @@ class Indexer:
     ):
         while True:
             """
-                1. get all urls from the first page of the site
-                2. for each url:
-                    2.1. parse the url and get the film_id
-                    2.2. check if the film_id is already in the database
-                    2.3. if it is not, begin indexing
-                3. wait for an a bit
+            1. get all urls from the first page of the site
+            2. for each url:
+                2.1. parse the url and get the film_id
+                2.2. check if the film_id is already in the database
+                2.3. if it is not, begin indexing
+            3. wait for an a bit
             """
-            
+
             urls: list[str] = collect_urls(
                 get_document("https://hqporner.com/hdporn/1")
             )

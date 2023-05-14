@@ -1,11 +1,15 @@
 import argparse
-from indexer.indexer import Indexer
-from downloader.downloader import Downloader
-from util.database.database_access import DatabaseAccess
-from pathlib import Path
 import logging
-from dotenv import load_dotenv
 import os
+from pathlib import Path
+
+import uvicorn
+from dotenv import load_dotenv
+
+from downloader.downloader import Downloader
+from indexer.indexer import Indexer
+from server.server import Server
+from util.database.database_access import DatabaseAccess
 
 parser = argparse.ArgumentParser(description="pogger")
 parser.add_argument(
@@ -37,11 +41,11 @@ if args.flush == "True":
     db.initialize(Path("./util/database/tables.sql"))
     db.populate_demo_data()
 
-args.app = "downloader"
-match args.app:
-    case "server":
-        exit()  # start with waitress or uvicorn
-    case "downloader":
-        Downloader(databaseAccess=db).main_loop()
-    case "indexer":
-        Indexer(databaseAccess=db).main_loop()
+if __name__ == "__main__":
+    match args.app:
+        case "server":
+            Server(databaseAccess=db).main_loop()
+        case "downloader":
+            Downloader(databaseAccess=db).main_loop()
+        case "indexer":
+            Indexer(databaseAccess=db).main_loop()

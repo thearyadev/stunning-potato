@@ -1,20 +1,17 @@
-from util.scraper.detail_page import (
-    get_download_url,
-    get_iframe_source,
-)
-from util.scraper.document import get_document
-
-from util.database.database_access import DatabaseAccess
-import time
-from util.models.film import FilmStateEnum, Film
-from util.models.queue import Queue
-
 import logging
-from beartype import beartype
-import urllib.request
 import os
+import time
+import urllib.request
 from pathlib import Path
 from uuid import UUID
+
+from beartype import beartype
+
+from util.database.database_access import DatabaseAccess
+from util.models.film import Film, FilmStateEnum
+from util.models.queue import Queue
+from util.scraper.detail_page import get_download_url, get_iframe_source
+from util.scraper.document import get_document
 
 
 @beartype
@@ -23,6 +20,7 @@ class Downloader:
         self.db = databaseAccess
         self.download_path = Path(os.getenv("DOWNLOAD_PATH"))
         self.last_reported_progress = None
+
     def main_loop(self):
         while True:
             queue_item: Queue = self.db.get_and_pop_queue()  # get and pop from queue
