@@ -7,6 +7,7 @@ import ListPageListing from 'containers/pages/ListPageListing';
 import ListPageHeading from 'containers/pages/ListPageHeading';
 import { DropdownToggle, DropdownItem, DropdownMenu, ButtonDropdown } from 'reactstrap';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 const items = [
   {
@@ -32,9 +33,9 @@ const Start = ({ match }) => {
   const [sortingDropdownOpen, setSortingDropdownOpen] = useState(false);
   const toggleSortingDropdown = () => setSortingDropdownOpen(!sortingDropdownOpen)
 
-  const [actressFilterDropdownOpen, setActressFilterDropdownOpen] = useState(false);
-  const toggleActressFilterDropdown = () => setActressFilterDropdownOpen(!actressFilterDropdownOpen)
 
+  const number = useSelector(state => state.library.number);
+  console.log(number)
   return <>
     <Row>
       <Colxx xxs="12">

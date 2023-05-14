@@ -67,7 +67,10 @@
     ],
     "import/no-duplicates":[
       "off"
-    ]
+    ],
+    "no-underscore-dangle": [
+      "off"
+    ],
   },
   "globals": {
     "window": true,

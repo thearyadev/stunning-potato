@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {
   BrowserRouter as Router,
   Route,
@@ -24,6 +25,9 @@ const ViewError = React.lazy(() =>
 class App extends React.Component {
   constructor(props) {
     super(props);
+
+
+
     const direction = getDirection();
     if (direction.isRtl) {
       document.body.classList.add('rtl');
@@ -37,7 +41,6 @@ class App extends React.Component {
   render() {
     const { locale } = this.props;
     const currentAppLocale = AppLocale[locale];
-
     return (
       <div className="h-100">
         <IntlProvider

@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { Route, withRouter, Switch, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-
+import { useSelector } from 'react-redux';
 import AppLayout from 'layout/AppLayout';
 
 const Cinema = React.lazy(() =>
