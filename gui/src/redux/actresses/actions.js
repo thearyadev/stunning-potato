@@ -24,7 +24,7 @@ export const fetchActresses = () => {
   return async (dispatch) => {
     dispatch(fetchActressesRequest());
     try{
-      const response = await fetch("/api/actresses");
+      const response = await fetch("/api/actress_detail");
       const data = await response.json();
       dispatch(fetchActressesSuccess(data));
       dispatch(setActresses(data));

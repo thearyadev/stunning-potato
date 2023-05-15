@@ -7,6 +7,7 @@ from fastapi.responses import Response
 from util.database.database_access import DatabaseAccess
 from util.models.film import FilmNoBytes, FilmNoBytesWithAverage
 from util.models.rating import Rating, RatingIn
+from util.models.actress_detail import ActressDetail
 
 
 class Server:
@@ -15,6 +16,9 @@ class Server:
         self.app = FastAPI()
         self.router = APIRouter(prefix="/api")
         self.router.add_api_route("/actresses", self.get_actresses, methods=["GET"])
+        self.router.add_api_route(
+            "/actress_detail", self.get_all_actress_detail, methods=["GET"]
+        )
         self.router.add_api_route(
             "/films", self.get_films_no_bytes_with_average, methods=["GET"]
         )
@@ -56,3 +60,6 @@ class Server:
     def set_rating(self, rating: Rating) -> Rating:
         self.db.update_rating(rating)
         return self.db.get_rating(rating.uuid)
+
+    def get_all_actress_detail(self) -> list[ActressDetail]:
+        return self.db.get_actress_detail_all()

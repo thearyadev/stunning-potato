@@ -8,7 +8,7 @@ const Start = ({ match }) => (
   <>
     <Row>
       <Colxx xxs="12">
-        <Breadcrumb heading="Nouvelle" match={match} />
+        <Breadcrumb heading="nouvelle" match={match} />
         <Separator className="mb-5" />
       </Colxx>
     </Row>

@@ -7,7 +7,7 @@ import { radarChartOptions } from './config';
 const Radar = ({ data, shadow = false }) => {
   const chartContainer = useRef(null);
   const [, setChartInstance] = useState(null);
-
+  
   useEffect(() => {
     if (chartContainer && chartContainer.current) {
       if (shadow) {

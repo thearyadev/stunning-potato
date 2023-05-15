@@ -115,11 +115,11 @@ const Player = ({ match, uuid }) => {
                 })}</i>
               </div>
               <div className='d-flex justify-content-between'>
-                <i>Durée: </i>
+                <i>durée: </i>
                 <i>{formatTime(film.duration)}</i>
               </div>
               <div className='d-flex justify-content-between'>
-                <i>Date d’ajout: </i>
+                <i>date d’ajout: </i>
                 <i>{film.date_added}</i>
               </div>
               <div className='d-flex justify-content-between'>

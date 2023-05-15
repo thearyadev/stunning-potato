@@ -19,6 +19,7 @@ from util.models.film import (
 from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
+from util.models.actress_detail import ActressDetail
 
 
 @beartype
@@ -639,3 +640,41 @@ class DatabaseAccess:
         logging.info(f"Retrieved film {filmRetrieved}")
         self.connection_pool.putconn(connection)
         return filmRetrieved
+
+    def get_actress_detail_all(self) -> list[ActressDetail]:
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT 
+                    actress as name, 
+                    ROUND(CAST(AVG(average) AS NUMERIC), 2) as average,
+                    ROUND(CAST(AVG(story) AS NUMERIC), 2) AS story, 
+                    ROUND(CAST(AVG(positions) AS NUMERIC), 2) AS positions, 
+                    ROUND(CAST(AVG(pussy) AS NUMERIC), 2) AS pussy, 
+                    ROUND(CAST(AVG(shots) AS NUMERIC), 2) AS shots, 
+                    ROUND(CAST(AVG(boobs) AS NUMERIC), 2) AS boobs, 
+                    ROUND(CAST(AVG(face) AS NUMERIC), 2) AS face, 
+                    ROUND(CAST(AVG(rearview) AS NUMERIC), 2) AS rearview,
+                    count(*) as film_count
+                FROM (
+                SELECT 
+                    unnest(actresses) AS actress, 
+                    rating.*
+                FROM 
+                    film 
+                    JOIN rating ON film.rating = rating.uuid
+                ) subquery
+                GROUP BY 
+                actress;
+                """
+            )
+
+            actresses: list[ActressDetail] = [
+                ActressDetail(**a) for a in cursor.fetchall()
+            ]
+
+        self.connection_pool.putconn(connection)
+
+        logging.info("Retrieved all actress detail")
+        return actresses

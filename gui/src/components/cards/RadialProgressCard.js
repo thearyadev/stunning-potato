@@ -8,7 +8,7 @@ const RadialProgressCard = ({
   isSortable = false,
 }) => {
   return (
-    <Card>
+    <Card style={{boxShadow: "none"}} className='p-0'>
       {isSortable && (
         <CardHeader className="p-0 position-relative">
           <div className="position-absolute handle card-icon">
@@ -21,8 +21,8 @@ const RadialProgressCard = ({
         <div className="progress-bar-circle">
           <CircularProgressbar
             strokeWidth={4}
-            value={percent}
-            text={`${percent}%`}
+            value={percent * 10}
+            text={`${percent}`}
           />
         </div>
       </CardBody>

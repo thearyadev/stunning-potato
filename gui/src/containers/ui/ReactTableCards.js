@@ -10,6 +10,7 @@ import classnames from 'classnames';
 
 import IntlMessages from 'helpers/IntlMessages';
 import DatatablePagination from 'components/DatatablePagination';
+import { useHistory } from 'react-router-dom/cjs/react-router-dom';
 
 import products from '../../data/products';
 
@@ -35,6 +36,10 @@ function Table({ columns, data, divided = false, defaultPageSize = 6 }) {
     useSortBy,
     usePagination
   );
+  const history = useHistory();
+  const Redirect = (url) => {
+    history.push(url);
+  }
 
   return (
     <>
@@ -71,10 +76,7 @@ function Table({ columns, data, divided = false, defaultPageSize = 6 }) {
             return (
               <tr
                 {...row.getRowProps({
-                  onClick: () => {
-                    console.log(row)
-                    window.location.href = row.cells[0].value
-                  },
+                  onClick: () => Redirect(row.cells[0].value),
                   
                 })}
               >
@@ -205,14 +207,14 @@ export const ActressTable = ({ data }) => {
       },
       {
         Header: 'nombre de films',
-        accessor: 'filmCount',
-        cellClass: 'text-muted  w-10',
+        accessor: 'film_count',
+        cellClass: 'text-muted w-10',
         Cell: (props) => <>{props.value}</>,
       },
       {
         Header: 'évaluation moyenne',
-        accessor: 'averageRating',
-        cellClass: 'text-muted  w-10',
+        accessor: 'average',
+        cellClass: 'text-muted w-10',
         Cell: (props) => <>{props.value}</>,
       },
     ],

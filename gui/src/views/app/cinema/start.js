@@ -36,17 +36,23 @@ const Start = ({ match }) => {
   const [sortingDropdownOpen, setSortingDropdownOpen] = useState(false);
   const toggleSortingDropdown = () => setSortingDropdownOpen(!sortingDropdownOpen)
   const films = useSelector(state => state.films.films);
-  setTimeout( async ()=> {document.querySelectorAll(".video-listing-card").forEach(element => {element.style.visibility = "visible"})}, 1500)
+  setTimeout(async () => { document.querySelectorAll(".video-listing-card").forEach(element => { element.style.visibility = "visible" }) }, 1500)
   const sort = (method) => {
 
   }
   return <>
+
     <Row>
       <Colxx xxs="12">
+
+
+        <Breadcrumb heading="cinéma" match={match} style={{display: "block"}} />
+
         <ButtonDropdown
           className="mr-1 mb-3"
           isOpen={sortingDropdownOpen}
           toggle={toggleSortingDropdown}
+          style={{display: "block"}}
 
         >
           <DropdownToggle caret size="xs" outline>
@@ -70,18 +76,18 @@ const Start = ({ match }) => {
       <Colxx xxs="12" className="mb-4">
 
         {/* this is the video library  */}
-          <ListPageListing
-            items={films}
-            displayMode={"imagelist"}
-            selectedItems={[]}
-            onCheckItem={() => { }}
-            currentPage={1}
-            totalPage={10}
-            onContextMenuClick={() => { }}
-            onChangePage={() => { }}
+        <ListPageListing
+          items={films}
+          displayMode={"imagelist"}
+          selectedItems={[]}
+          onCheckItem={() => { }}
+          currentPage={1}
+          totalPage={10}
+          onContextMenuClick={() => { }}
+          onChangePage={() => { }}
 
 
-          />
+        />
       </Colxx>
     </Row>
   </>
