@@ -23,24 +23,36 @@ html {
     transform: rotate(30deg);
 }
 
-.info-pill{
+.info-pill {
     transition: transform 0.2s ease-in-out;
     transform-origin: center center;
 }
 
-.info-pill:hover{
+.info-pill:hover {
     transform: scale(1.5)
-
 }
 
-#side-nav{
+#side-nav {
     // transform: translateY(50%);
     justify-content: space-between;
     height: 70%;
 }
+
 .sidebar .main-menu ul li a {
     border-bottom: none;
 }
-.sidebar .main-menu ul li.active::after{
+
+.sidebar .main-menu ul li.active::after {
     display: none;
+}
+
+.slider-container:hover>div>span>div.rc-slider-tooltip {
+    visibility: visible;
+}
+
+.slider-container>div>span>div.rc-slider-tooltip {
+    visibility: hidden;
+}
+.video-listing-card{
+    visibility: hidden;
 }

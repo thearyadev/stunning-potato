@@ -26,6 +26,7 @@ const ListPageListing = ({
             isSelect={selectedItems.includes(film.id)}
             collect={collect}
             onCheckItem={onCheckItem}
+            
           />
         );
       })}

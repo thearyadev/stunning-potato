@@ -69,7 +69,15 @@ function Table({ columns, data, divided = false, defaultPageSize = 6 }) {
           {page.map((row) => {
             prepareRow(row);
             return (
-              <tr {...row.getRowProps()}>
+              <tr
+                {...row.getRowProps({
+                  onClick: () => {
+                    console.log(row)
+                    window.location.href = row.cells[0].value
+                  },
+                  
+                })}
+              >
                 {row.cells.map((cell, cellIndex) => (
                   <td
                     key={`td_${cellIndex}`}
@@ -182,6 +190,37 @@ export const ReactTableDivided = () => {
         <IntlMessages id="table.divided" />
       </CardTitle>
       <Table columns={cols} data={products} divided />
+    </div>
+  );
+};
+
+export const ActressTable = ({ data }) => {
+  const cols = React.useMemo(
+    () => [
+      {
+        Header: 'nom',
+        accessor: 'name',
+        cellClass: 'list-item-heading w-40',
+        Cell: (props) => <>{props.value}</>,
+      },
+      {
+        Header: 'nombre de films',
+        accessor: 'filmCount',
+        cellClass: 'text-muted  w-10',
+        Cell: (props) => <>{props.value}</>,
+      },
+      {
+        Header: 'évaluation moyenne',
+        accessor: 'averageRating',
+        cellClass: 'text-muted  w-10',
+        Cell: (props) => <>{props.value}</>,
+      },
+    ],
+    []
+  );
+  return (
+    <div className="mb-4">
+      <Table columns={cols} data={data} divided />
     </div>
   );
 };

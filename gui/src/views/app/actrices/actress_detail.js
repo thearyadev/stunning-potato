@@ -4,11 +4,11 @@ import IntlMessages from 'helpers/IntlMessages';
 import { Colxx, Separator } from 'components/common/CustomBootstrap';
 import Breadcrumb from 'containers/navs/Breadcrumb';
 
-const Second = ({ match }) => (
+const ActressDetail = ({ match, actress }) => (
   <>
     <Row>
       <Colxx xxs="12">
-        <Breadcrumb heading="menu.second" match={match} />
+        <Breadcrumb heading={actress} match={match} />
         <Separator className="mb-5" />
       </Colxx>
     </Row>
@@ -21,4 +21,4 @@ const Second = ({ match }) => (
     </Row>
   </>
 );
-export default Second;
+export default ActressDetail;

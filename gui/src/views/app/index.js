@@ -13,6 +13,10 @@ const Nouvelle = React.lazy(() =>
   import(/* webpackChunkName: "viwes-second-menu" */ './nouvelle')
 );
 
+const Actrices = React.lazy(() =>
+  import(/* webpackChunkName: "viwes-second-menu" */ './actrices')
+);
+
 
 const App = ({ match }) => {
   const films = useSelector((state) => state.films.films);
@@ -42,6 +46,10 @@ const App = ({ match }) => {
               <Route
                 path={`${match.url}/nouvelle`}
                 render={(props) => <Nouvelle {...props} />}
+              />
+              <Route
+              path={`${match.url}/actrices`}
+              render={(props) => <Actrices {...props} />}
               />
               {/* if no route is matched, go to error.  */}
             </Switch>

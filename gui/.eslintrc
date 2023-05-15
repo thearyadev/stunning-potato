@@ -71,6 +71,17 @@
     "no-underscore-dangle": [
       "off"
     ],
+    "react/no-array-index-key": [
+      "off"
+    ],
+    "jsx-a11y/media-has-caption":[
+      "off"
+    ],
+    "no-param-reassign":[
+      "off"
+    ]
+    
+    
   },
   "globals": {
     "window": true,

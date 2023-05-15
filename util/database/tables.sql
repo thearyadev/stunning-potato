@@ -101,3 +101,27 @@ EXECUTE FUNCTION update_rating_average();
 -- SELECT * FROM queue WHERE uuid = (
 --   SELECT uuid FROM queue ORDER BY uuid LIMIT 1 FOR UPDATE SKIP LOCKED
 -- ) LIMIT 1 FOR UPDATE;
+
+
+
+-- SELECT 
+--   actress, 
+--   AVG(average) as avg_avg,
+--   AVG(story) AS story_avg, 
+--   AVG(positions) AS positions_avg, 
+--   AVG(pussy) AS px_avg, 
+--   AVG(shots) AS shots_avg, 
+--   AVG(boobs) AS bx_avg, 
+--   AVG(face) AS face_avg, 
+--   AVG(rearview) AS rearview_avg,
+--   count(*) as num_of_films
+-- FROM (
+--   SELECT 
+--     unnest(actresses) AS actress, 
+--     rating.*
+--   FROM 
+--     film 
+--     JOIN rating ON film.rating = rating.uuid
+-- ) subquery
+-- GROUP BY 
+--   actress;

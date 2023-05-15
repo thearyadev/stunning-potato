@@ -11,7 +11,7 @@ const sliderHandle = ({ value, dragging, index, offset, ...restProps }) => {
   return (
     <span key={index}>
       <div className="rc-slider-tooltip" style={positionStyle}>
-        {`$${value}`}
+        {`${value}`}
       </div>
       <Slider.Handle value={value} offset={offset} {...restProps} />
     </span>

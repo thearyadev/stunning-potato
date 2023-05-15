@@ -45,7 +45,17 @@ class App extends React.Component {
     const { FetchActresses, FetchFilms } = this.props;
     FetchActresses();
     FetchFilms();
+    const intervalId = setInterval(async () => {
+      FetchActresses();
+      FetchFilms();
+    }, 5000); 
 
+    this.intervalId = intervalId;
+
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.intervalId);
   }
 
   render() {

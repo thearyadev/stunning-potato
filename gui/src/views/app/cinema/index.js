@@ -9,7 +9,7 @@ const Player = React.lazy(() =>
   import(/* webpackChunkName: "start" */ './player')
 );
 
-const Gogo = ({ match }) => (
+const Cinema = ({ match }) => (
   <Suspense fallback={<div className="loading" />}>
     <Switch>
       <Redirect exact from={`${match.url}/`} to={`${match.url}/cinémathèque`} />
@@ -26,4 +26,4 @@ const Gogo = ({ match }) => (
     </Switch>
   </Suspense>
 );
-export default Gogo;
+export default Cinema;

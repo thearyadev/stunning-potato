@@ -24,6 +24,7 @@ const ImageListView = ({ film }) => {
     <Colxx sm="6" lg="4" xl="3" className="mb-3" key={film.uuid}>
       <Card
         onClick={(event) => { }}
+        className='video-listing-card'
       >
         <div className="position-relative">
           <NavLink to={`${currentPathname}/${film.uuid}`} className="w-40 w-sm-100">
