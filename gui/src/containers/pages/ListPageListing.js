@@ -17,7 +17,7 @@ const ListPageListing = ({
 
 }) => {
   return (
-    <Row>
+    <Row className=''>
       {items.map((film) => {
         return (
           <ImageListView

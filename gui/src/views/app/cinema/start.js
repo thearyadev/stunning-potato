@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { Row } from 'reactstrap';
+import { Container, Row } from 'reactstrap';
 import IntlMessages from 'helpers/IntlMessages';
 import { Colxx, Separator } from 'components/common/CustomBootstrap';
 import Breadcrumb from 'containers/navs/Breadcrumb';
@@ -46,13 +46,13 @@ const Start = ({ match }) => {
       <Colxx xxs="12">
 
 
-        <Breadcrumb heading="cinéma" match={match} style={{display: "block"}} />
+        <Breadcrumb heading="cinéma" match={match} style={{ display: "block" }} />
 
         <ButtonDropdown
           className="mr-1 mb-3"
           isOpen={sortingDropdownOpen}
           toggle={toggleSortingDropdown}
-          style={{display: "block"}}
+          style={{ display: "block" }}
 
         >
           <DropdownToggle caret size="xs" outline>

@@ -494,7 +494,7 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                "SELECT f.uuid, f.title, f.duration, f.date_added, f.filename, f.watched, f.state, f.download_progress, f.actresses, f.rating, r.average FROM film f join rating r on f.rating = r.uuid",
+                "SELECT f.uuid, f.title, f.duration, f.date_added, f.filename, f.watched, f.state, f.download_progress, f.actresses, f.rating, r.average FROM film f join rating r on f.rating = r.uuid ORDER BY f.uuid",
             )
             films: list[FilmNoBytesWithAverage] = [
                 FilmNoBytesWithAverage(**film) for film in cursor.fetchall()
@@ -586,7 +586,7 @@ class DatabaseAccess:
                                     0, (date(2023, 4, 22) - date(2022, 4, 22)).days
                                 )
                             ),
-                            watched=random.choice([True, False]),
+                            watched=random.choice([False]),
                             state=random.choice(list(FilmStateEnum)),
                             thumbnail=thumbnail.read(),
                             poster=poster.read(),
@@ -666,7 +666,8 @@ class DatabaseAccess:
                     JOIN rating ON film.rating = rating.uuid
                 ) subquery
                 GROUP BY 
-                actress;
+                actress
+                ORDER BY name;
                 """
             )
 
@@ -678,3 +679,17 @@ class DatabaseAccess:
 
         logging.info("Retrieved all actress detail")
         return actresses
+
+    def update_watch_status(self, uuid: UUID, watch_status: bool) -> None:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE film SET watched = %s WHERE uuid = %s",
+                (
+                    watch_status,
+                    uuid,
+                ),
+            )
+            connection.commit()
+        logging.info(f"Updated watch status for film {uuid}")
+        self.connection_pool.putconn(connection)

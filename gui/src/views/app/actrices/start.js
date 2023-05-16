@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {memo} from 'react';
 import { Row } from 'reactstrap';
 import IntlMessages from 'helpers/IntlMessages';
 import { Colxx, Separator } from 'components/common/CustomBootstrap';
@@ -7,8 +7,6 @@ import { ActressTable } from 'containers/ui/ReactTableCards';
 import { useSelector } from 'react-redux';
 import { useState } from 'react';
 import { useEffect } from 'react';
-
-
 
 
 const Start = ({ match }) => {

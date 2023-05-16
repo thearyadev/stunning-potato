@@ -16,7 +16,7 @@ const RadialProgressCard = ({
           </div>
         </CardHeader>
       )}
-      <CardBody className="d-flex justify-content-between align-items-center">
+      <CardBody className="d-flex justify-content-between align-items-center p-2">
         <CardTitle className="mb-0">{title}</CardTitle>
         <div className="progress-bar-circle">
           <CircularProgressbar

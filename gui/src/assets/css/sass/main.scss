@@ -56,3 +56,12 @@ html {
 .video-listing-card{
     visibility: hidden;
 }
+
+.of-style-none{
+    scrollbar-width: none; /* hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* hide scrollbar for Internet Explorer 10+ */
+    border-radius: .25rem;
+}
+.of-style-none::-webkit-scrollbar {
+    width: 0 !important; /* hide scrollbar for Chrome, Safari, and Opera */
+  }

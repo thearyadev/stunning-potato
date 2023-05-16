@@ -3,6 +3,12 @@ import { adminRoot } from './defaultValues';
 
 const data = [
   {
+    id: 'accueil',
+    icon: 'iconsminds-home-1',
+    label: 'accueil',
+    to: `${adminRoot}/accueil`,
+  },
+  {
     id: 'films',
     icon: 'simple-icon-film',
     label: 'cinéma',
@@ -20,5 +26,6 @@ const data = [
     label: 'actrices',
     to: `${adminRoot}/actrices`,
   },
+  
 ];
 export default data;

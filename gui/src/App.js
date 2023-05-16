@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import {
   BrowserRouter as Router,
@@ -28,7 +28,7 @@ const ViewError = React.lazy(() =>
 class App extends React.Component {
   constructor(props) {
     super(props);
-
+    const completed = false;
 
 
     const direction = getDirection();
@@ -48,8 +48,7 @@ class App extends React.Component {
     const intervalId = setInterval(async () => {
       FetchActresses();
       FetchFilms();
-    }, 5000); 
-
+    }, 5000);
     this.intervalId = intervalId;
 
   }
@@ -84,7 +83,7 @@ class App extends React.Component {
                   />
                   {/* redirects / to cinema page */}
 
-                  <Redirect exact from="/" to={`${adminRoot}/cinema`} />
+                  <Redirect exact from="/" to={`${adminRoot}/accueil`} />
 
                   <Redirect to="/error" />
 
@@ -101,6 +100,7 @@ class App extends React.Component {
 
 const mapStateToProps = ({ settings }) => {
   const { locale } = settings;
+
   return { locale };
 };
 const mapActionsToProps = (dispatch) => {

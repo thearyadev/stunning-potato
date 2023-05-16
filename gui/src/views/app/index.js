@@ -17,6 +17,9 @@ const Actrices = React.lazy(() =>
   import(/* webpackChunkName: "viwes-second-menu" */ './actrices')
 );
 
+const Accueil = React.lazy(() =>
+  import(/* webpackChunkName: "viwes-second-menu" */ './accueil')
+);
 
 const App = ({ match }) => {
   const films = useSelector((state) => state.films.films);
@@ -39,6 +42,10 @@ const App = ({ match }) => {
           <Suspense fallback={<div className="loading" />}>
             <Switch>
               {/* redirects / to /<endpoint> */}
+              <Route 
+                path={`${match.url}/accueil`}
+                render={(props) => <Accueil {...props} />}
+              />
               <Route
                 path={`${match.url}/cinema`}
                 render={(props) => <Cinema {...props} />}
@@ -51,6 +58,7 @@ const App = ({ match }) => {
               path={`${match.url}/actrices`}
               render={(props) => <Actrices {...props} />}
               />
+              
               {/* if no route is matched, go to error.  */}
             </Switch>
           </Suspense>

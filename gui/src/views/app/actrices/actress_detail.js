@@ -40,6 +40,7 @@ import { ThemeColors } from 'helpers/ThemeColors';
 import { act } from 'react-dom/test-utils';
 import RadialProgressCard from 'components/cards/RadialProgressCard';
 import { Separator } from 'components/common/CustomBootstrap';
+import { Container, Col } from 'reactstrap';
 
 const ActressDetail = ({ match, actress }) => {
   const actresses = useSelector(state => state.actresses.actresses);
@@ -75,49 +76,49 @@ const ActressDetail = ({ match, actress }) => {
                   </CardTitle>
                   <div className="remove-last-border remove-last-margin remove-last-padding">
                     <RadialProgressCard
-                      className="mb-4"
+                      className=""
                       title="average"
                       percent={actressData.average}
                       isSortable={false}
                     />
                     <RadialProgressCard
-                      className="mb-4"
+                      className=""
                       title="story"
                       percent={actressData.story}
                       isSortable={false}
                     />
                     <RadialProgressCard
-                      className="mb-4"
+                      className=""
                       title="positions"
                       percent={actressData.positions}
                       isSortable={false}
                     />
                     <RadialProgressCard
-                      className="mb-4"
+                      className=""
                       title="pussy"
                       percent={actressData.pussy}
                       isSortable={false}
                     />
                     <RadialProgressCard
-                      className="mb-4"
+                      className=""
                       title="shots"
                       percent={actressData.shots}
                       isSortable={false}
                     />
                     <RadialProgressCard
-                      className="mb-4"
+                      className=""
                       title="boobs"
                       percent={actressData.boobs}
                       isSortable={false}
                     />
                     <RadialProgressCard
-                      className="mb-4"
+                      className=""
                       title="face"
                       percent={actressData.face}
                       isSortable={false}
                     />
                     <RadialProgressCard
-                      className="mb-4"
+                      className=""
                       title="rearview"
                       percent={actressData.rearview}
                       isSortable={false}
@@ -129,50 +130,52 @@ const ActressDetail = ({ match, actress }) => {
 
             <Colxx xxs="12" lg="8" className="mb-4 col-right">
               {/* PRODS */}
-              <Row>
-                {actressFilms.map((film) => {
-                  return (
-                    <Colxx
-                      xxs="12"
-                      lg="6"
-                      xl="4"
-                      className="mb-4"
-                      key={film.uuid}
-                    >
-                      <Card onClick={() => { history.replace(`../cinema/cinémathèque/${film.uuid}`) }}>
-                        <div className="position-relative">
-                          <NavLink
-                            to="#"
-                            location={{}}
-                            className="w-40 w-sm-100"
-                          >
-                            <LazyLoad height={200} offset={1200} throttle={100}>
+              <Container style={{ height: '77vh', overflowY: 'scroll' }} className='of-style-none'>
+                <Row>
+                  {actressFilms.map((film) => {
+                    return (
+                      <Colxx
+                        xxs="12"
+                        lg="6"
+                        xl="4"
+                        className="mb-4"
+                        key={film.uuid}
+                      >
+                        <Card onClick={() => { history.replace(`../cinema/cinémathèque/${film.uuid}`) }}>
+                          <div className="position-relative">
+                            <NavLink
+                              to="#"
+                              location={{}}
+                              className="w-40 w-sm-100"
+                            >
+                              <LazyLoad height={200} offset={1200} throttle={100}>
 
-                              <CardImg
-                                top
-                                alt={film.title}
-                                src={`/api/thumbnail?uuid=${film.uuid}`}
-                              />
-                            </LazyLoad>
-                          </NavLink>
-                        </div>
-                        <CardBody>
-                          <NavLink
-                            to="#"
-                            location={{}}
-                            className="w-40 w-sm-100"
-                          >
-                            <CardSubtitle>{film.title}</CardSubtitle>
-                          </NavLink>
-                          <CardText className="text-muted text-small mb-0 font-weight-light">
-                            {film.date_added}
-                          </CardText>
-                        </CardBody>
-                      </Card>
-                    </Colxx>
-                  );
-                })}
-              </Row>
+                                <CardImg
+                                  top
+                                  alt={film.title}
+                                  src={`/api/thumbnail?uuid=${film.uuid}`}
+                                />
+                              </LazyLoad>
+                            </NavLink>
+                          </div>
+                          <CardBody>
+                            <NavLink
+                              to="#"
+                              location={{}}
+                              className="w-40 w-sm-100"
+                            >
+                              <CardSubtitle>{film.title}</CardSubtitle>
+                            </NavLink>
+                            <CardText className="text-muted text-small mb-0 font-weight-light">
+                              {film.date_added}
+                            </CardText>
+                          </CardBody>
+                        </Card>
+                      </Colxx>
+                    );
+                  })}
+                </Row>
+              </Container>
 
 
             </Colxx>

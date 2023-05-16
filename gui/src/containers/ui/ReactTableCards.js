@@ -14,7 +14,7 @@ import { useHistory } from 'react-router-dom/cjs/react-router-dom';
 
 import products from '../../data/products';
 
-function Table({ columns, data, divided = false, defaultPageSize = 6 }) {
+function Table({ columns, data, divided = false, defaultPageSize = 999999999999 }) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -96,7 +96,7 @@ function Table({ columns, data, divided = false, defaultPageSize = 6 }) {
         </tbody>
       </table>
 
-      <DatatablePagination
+      {/* <DatatablePagination
         page={pageIndex}
         pages={pageCount}
         canPrevious={canPreviousPage}
@@ -108,7 +108,7 @@ function Table({ columns, data, divided = false, defaultPageSize = 6 }) {
         onPageChange={(p) => gotoPage(p)}
         onPageSizeChange={(s) => setPageSize(s)}
         paginationMaxSize={pageCount}
-      />
+      /> */}
     </>
   );
 }

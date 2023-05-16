@@ -33,6 +33,14 @@ const formatTime = (totalSeconds) => {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 }
 
+const ActressListItem = ({ item, isLast }) => (
+  <>
+    <a href={`https://google.com/search?q=${item} porn`} target='_blank' rel='noreferrer'>{item}</a>
+    {!isLast && ', '}
+  </>
+)
+
+
 const Player = ({ match, uuid }) => {
 
   const [film, setFilm] = useState(null);
@@ -52,7 +60,10 @@ const Player = ({ match, uuid }) => {
       body: JSON.stringify(userRating)
     })
       .then(res => res.json())
-      .then(data => setRating(data))
+      .then(data => {
+        setRating(data);
+        fetch(`/api/watch_status?uuid=${film.uuid}&watch_status=true`)
+      })
       .catch(err => {
 
       })
@@ -110,9 +121,13 @@ const Player = ({ match, uuid }) => {
             <div className='pt-3'>
               <div className='d-flex justify-content-between'>
                 <i>actrices: </i>
-                <i>{film.actresses.join(", ").split(" ").map((item, key) => {
-                  return <a key={key} href={`https://google.com/search?q=${item.split(" ").join("%20")}%20porn`} target="_blank" rel='noreferrer'>{item} </a>
-                })}</i>
+                <i>{
+                  film.actresses.map((item, index) => (
+                    <ActressListItem key={index} item={item} isLast={index === film.actresses.length - 1} />
+                  )
+                  )
+                }
+                </i>
               </div>
               <div className='d-flex justify-content-between'>
                 <i>durée: </i>
