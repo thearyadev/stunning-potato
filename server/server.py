@@ -52,7 +52,25 @@ class Server:
         uvicorn.run(self.app, port=8000)
 
     def get_actresses(self) -> list[str]:
-        return self.db.get_all_actresses()
+        if self.cache.stamp is None:  # first run, no stamp. Data must be outdated.
+            logging.info("First run, no stamp. Data must be outdated. ")
+            self.cache.actresses = (
+                self.db.get_actress_detail_all()
+            )  # refresh cache
+            self.cache.stamp = self.db.get_latest_commit_uuid()  # set stamp
+            return self.cache.actresses  # return refreshed cache
+
+        if self.cache.stamp != (
+            latestStamp := self.db.get_latest_commit_uuid()
+        ):  # if stamp is outdated
+            logging.info("Stamp is outdated. Data must be outdated. ")
+            self.cache.actresses = self.db.get_actress_detail_all()
+            # refresh cache
+            self.cache.stamp = latestStamp  # set stamp
+            return self.cache.actresses  # return refreshed cache
+        logging.info("Stamp is up to date. Data must be up to date. ")
+        return self.cache.actresses  # return cache
+    
 
     def get_films_no_bytes_with_average(self) -> list[FilmNoBytesWithAverage]:
         if self.cache.stamp is None:  # first run, no stamp. Data must be outdated.
