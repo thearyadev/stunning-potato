@@ -205,7 +205,7 @@ const TopNav = ({
           location={{}}
           className="menu-button d-none d-md-block"
           onClick={(e) =>
-            menuButtonClick(e, menuClickCount, containerClassnames)
+            history.push("/foutre/accueil")
           }
         >
           <MenuIcon />

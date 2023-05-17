@@ -96,6 +96,66 @@ AFTER INSERT OR UPDATE OF story, positions, pussy, shots, boobs, rearview ON rat
 FOR EACH ROW
 EXECUTE FUNCTION update_rating_average();
 
+CREATE TABLE IF NOT EXISTS history (
+  uuid UUID,
+  table_name VARCHAR(255),
+  action VARCHAR(10),
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE OR REPLACE FUNCTION insert_update_delete_history_film()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (TG_OP = 'INSERT') THEN
+    INSERT INTO history (uuid, table_name, action)
+    VALUES (uuid_generate_v4(), 'film', 'insert');
+    RETURN NEW;
+  ELSIF (TG_OP = 'UPDATE') THEN
+    INSERT INTO history (uuid, table_name, action)
+    VALUES (uuid_generate_v4(), 'film', 'update');
+    RETURN NEW;
+  ELSIF (TG_OP = 'DELETE') THEN
+    INSERT INTO history (uuid, table_name, action)
+    VALUES (uuid_generate_v4(), 'film', 'delete');
+    RETURN OLD;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER insert_update_delete_history_film_trigger
+AFTER INSERT OR UPDATE OR DELETE ON film
+FOR EACH ROW
+EXECUTE FUNCTION insert_update_delete_history_film();
+
+CREATE OR REPLACE FUNCTION insert_update_delete_history_rating()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (TG_OP = 'INSERT') THEN
+    INSERT INTO history (uuid, table_name, action)
+    VALUES (uuid_generate_v4(), 'rating', 'insert');
+    RETURN NEW;
+  ELSIF (TG_OP = 'UPDATE') THEN
+    INSERT INTO history (uuid, table_name, action)
+    VALUES (uuid_generate_v4(), 'rating', 'update');
+    RETURN NEW;
+  ELSIF (TG_OP = 'DELETE') THEN
+    INSERT INTO history (uuid, table_name, action)
+    VALUES (uuid_generate_v4(), 'rating', 'delete');
+    RETURN OLD;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER  insert_update_delete_history_rating_trigger
+AFTER INSERT OR UPDATE OR DELETE ON rating
+FOR EACH ROW
+EXECUTE FUNCTION insert_update_delete_history_rating();
+
+
+
+
+
 
 -- important select query
 -- SELECT * FROM queue WHERE uuid = (

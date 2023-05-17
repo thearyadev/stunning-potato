@@ -10,6 +10,14 @@ from util.models.rating import Rating, RatingIn
 from util.models.actress_detail import ActressDetail
 import shutil
 import os
+import logging
+
+
+class ReadCache:
+    def __init__(self) -> None:
+        self.films: list[FilmNoBytesWithAverage] = []
+        self.actresses: list[ActressDetail] = []
+        self.stamp: UUID = None
 
 
 class Server:
@@ -38,6 +46,7 @@ class Server:
             "/storage", self.get_available_storage, methods=["GET"]
         )
         self.app.include_router(self.router)
+        self.cache = ReadCache()
 
     def main_loop(self):
         uvicorn.run(self.app, port=8000)
@@ -46,7 +55,24 @@ class Server:
         return self.db.get_all_actresses()
 
     def get_films_no_bytes_with_average(self) -> list[FilmNoBytesWithAverage]:
-        return self.db.get_all_films_no_bytes_with_rating_average()
+        if self.cache.stamp is None:  # first run, no stamp. Data must be outdated.
+            logging.info("First run, no stamp. Data must be outdated. ")
+            self.cache.films = (
+                self.db.get_all_films_no_bytes_with_rating_average()
+            )  # refresh cache
+            self.cache.stamp = self.db.get_latest_commit_uuid()  # set stamp
+            return self.cache.films  # return refreshed cache
+
+        if self.cache.stamp != (
+            latestStamp := self.db.get_latest_commit_uuid()
+        ):  # if stamp is outdated
+            logging.info("Stamp is outdated. Data must be outdated. ")
+            self.cache.films = self.db.get_all_films_no_bytes_with_rating_average()
+            # refresh cache
+            self.cache.stamp = latestStamp  # set stamp
+            return self.cache.films  # return refreshed cache
+        logging.info("Stamp is up to date. Data must be up to date. ")
+        return self.cache.films  # return cache
 
     def get_single_film(
         self, uuid: UUID = Query(..., description="Film UUID")

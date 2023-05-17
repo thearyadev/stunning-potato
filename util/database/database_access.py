@@ -532,6 +532,18 @@ class DatabaseAccess:
             cursor.execute(
                 "DROP TRIGGER IF EXISTS update_rating_average_trigger ON rating;"
             )
+            cursor.execute(
+                "DROP TRIGGER IF EXISTS insert_update_delete_history_rating_trigger ON rating;"
+            )
+            cursor.execute(
+                "DROP FUNCTION IF EXISTS insert_update_delete_history_rating;"
+            )
+            cursor.execute("DROP FUNCTION IF EXISTS insert_update_delete_history_film;")
+            cursor.execute(
+                "DROP TRIGGER IF EXISTS insert_update_delete_history_film_trigger ON film;"
+            )
+
+            cursor.execute("DROP TABLE IF EXISTS history CASCADE;")
             cursor.execute("DROP FUNCTION IF EXISTS update_rating_average();")
             cursor.execute('DROP EXTENSION IF EXISTS "uuid-ossp" CASCADE;')
             cursor.execute("DROP TYPE IF EXISTS film_state")
@@ -693,3 +705,13 @@ class DatabaseAccess:
             connection.commit()
         logging.info(f"Updated watch status for film {uuid}")
         self.connection_pool.putconn(connection)
+
+    def get_latest_commit_uuid(self) -> UUID:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM history ORDER BY timestamp DESC LIMIT 1",
+            )
+            uuid = cursor.fetchone()[0]
+        self.connection_pool.putconn(connection)
+        return uuid

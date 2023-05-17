@@ -5,12 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "LAUNCH: Server",
+            "type": "python",
+            "request": "launch",
+            "program": "launch.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--app", "server", "--flush", "False", "--log-level", "CRITICAL"]
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file} --app downloader --flush False",
+            "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
-        }
+        },
     ]
 }

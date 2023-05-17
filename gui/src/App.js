@@ -46,8 +46,10 @@ class App extends React.Component {
     FetchActresses();
     FetchFilms();
     const intervalId = setInterval(async () => {
-      FetchActresses();
-      FetchFilms();
+      if (document.hasFocus()) {
+        FetchActresses();
+        FetchFilms();
+      }
     }, 5000);
     this.intervalId = intervalId;
 
