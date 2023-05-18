@@ -37,14 +37,14 @@ class DatabaseAccess:
         max_connections: int = 5,
         min_connections: int = 1,
     ):
-        self.db_name = db_name
+        self.db_name = db_name # db connection creds
         self.db_user = db_user
         self.db_password = db_password
         self.db_host = db_host
         self.db_port = db_port
-        self.min_connections = min_connections
+        self.min_connections = min_connections # for connection pool
         self.max_connections = max_connections
-        register_uuid()
+        register_uuid() # allows use of UUID objects in psycopg2
         self.connection_pool = pool.SimpleConnectionPool(
             host=self.db_host,
             port=self.db_port,
@@ -269,6 +269,14 @@ class DatabaseAccess:
         return result
 
     def get_by_count_indexed_no_bytes(self, count: int) -> list[IndexedNoBytes]:
+        """Retrives {count} number of indexed items from the database
+
+        Args:
+            count (int): number of indexed items to retrieve
+
+        Returns:
+            list[IndexedNoBytes]: list of indexed items
+        """
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
@@ -645,6 +653,12 @@ class DatabaseAccess:
                 )
 
     def set_film_progress(self, newProgress: int, film_uuid: UUID):
+        """Sets the download progress of a film
+
+        Args:
+            newProgress (int): new progress
+            film_uuid (UUID): film to update
+        """
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
@@ -656,6 +670,14 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
 
     def get_single_film_no_bytes(self, uuid: UUID) -> FilmNoBytes | None:
+        """gets a single film object with no bytes values (thumbnail, poster, etc)
+
+        Args:
+            uuid (UUID): uuid of the film to retrieve
+
+        Returns:
+            FilmNoBytes | None: Film object with no bytes values, or None if not found. 
+        """
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
@@ -672,8 +694,15 @@ class DatabaseAccess:
         return filmRetrieved
 
     def get_actress_detail_all(self) -> list[ActressDetail]:
+        """Gets all the actresses and calculates their average rating for each category
+
+        Returns:
+            list[ActressDetail]: list of ActressDetail objects
+        """        
+        
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
+            # this gets all the actresses and calculates their average rating for each category
             cursor.execute(
                 """
                 SELECT 
@@ -711,6 +740,12 @@ class DatabaseAccess:
         return actresses
 
     def update_watch_status(self, uuid: UUID, watch_status: bool) -> None:
+        """updates the watch status for a given film
+
+        Args:
+            uuid (UUID): film uuid
+            watch_status (bool): new watch status
+        """
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
@@ -725,6 +760,14 @@ class DatabaseAccess:
         self.connection_pool.putconn(connection)
 
     def get_latest_commit_uuid(self) -> UUID:
+        """The database has a trigger which runs on every database operation (other than read.)
+        This trigger inserts a new row into the history table.
+        this table is used to track when the database data has changed, and to only
+        rehydrate the server state once it has. 
+
+        Returns:
+            UUID: uuid of the latest commit
+        """
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
@@ -732,11 +775,18 @@ class DatabaseAccess:
             )
             uuid = cursor.fetchone()[0]
         self.connection_pool.putconn(connection)
+        logging.info(f"Retrieved latest commit uuid {uuid}")
         return uuid
 
     def delete_film(self, uuid: UUID) -> None:
+        """deletes a film from the database. This does not handle the deletion of the referenced video file.
+
+        Args:
+            uuid (UUID): uuid of film to delete
+        """
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
+            # this sql deletes the film and rating records in a single transaction
             cursor.execute(
                 "WITH deleted_film_ret AS (DELETE FROM film WHERE uuid = %s RETURNING rating) DELETE FROM rating where uuid = (SELECT * FROM deleted_film_ret);",
                 (uuid,),
@@ -746,6 +796,11 @@ class DatabaseAccess:
         logging.info(f"Deleted film {uuid}")
 
     def get_database_size(self) -> int:
+        """Query the current size of the database in Megabytes
+
+        Returns:
+            int: megabytes of database size
+        """
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
@@ -754,9 +809,18 @@ class DatabaseAccess:
             )
             size: int = int("".join([i for i in cursor.fetchone()[0] if i.isdigit()]))
         self.connection_pool.putconn(connection)
+        logging.info(f"Retrieved database size {size}")
         return size
 
     def get_indexed_thumbnail(self, uuid: UUID) -> bytes:
+        """gets the thumbnail of an indexed film
+
+        Args:
+            uuid (UUID): uuid of indexed item
+
+        Returns:
+            bytes: thumbnail bytes
+        """
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
@@ -765,4 +829,5 @@ class DatabaseAccess:
             )
             thumbnail: bytes = cursor.fetchone()[0]
         self.connection_pool.putconn(connection)
+        logging.info("Retrieved thumbnail")
         return bytes(thumbnail)

@@ -18,12 +18,16 @@ import time
 
 
 class ReadCache:
+    """Cache for read operations. This is used to reduce the number of database calls."""
     def __init__(self) -> None:
         self.films: list[FilmNoBytesWithAverage] = []
-        self.actresses: list[ActressDetail] = []
-        self.images: dict[UUID, bytes] = {}
         self.filmsStamp: UUID = None
+
+        self.actresses: list[ActressDetail] = []
         self.actressesStamp: UUID = None
+
+        self.images: dict[UUID, bytes] = {}
+        
 
 
 class Server:
@@ -63,6 +67,11 @@ class Server:
         uvicorn.run(self.app, port=8000)
 
     def get_films_no_bytes_with_average(self) -> list[FilmNoBytesWithAverage]:
+        """Queries all records in the films table. This is cached. If the cache is outdated, it will be refreshed.
+
+        Returns:
+            list[FilmNoBytesWithAverage]: list of FilmNoBytesWithAverage objects
+        """
         if self.cache.filmsStamp is None:  # first run, no stamp. Data must be outdated.
             logging.info("no stamp. Data must be outdated. :: films")
             self.cache.films = (
@@ -85,9 +94,25 @@ class Server:
     def get_single_film(
         self, uuid: UUID = Query(..., description="Film UUID")
     ) -> FilmNoBytes | None:
+        """Gets single film from cache or database.
+
+        Args:
+            uuid (UUID, optional): uuid of film. Defaults to Query(..., description="Film UUID").
+
+        Returns:
+            FilmNoBytes | None: FilmNoBytes object
+        """
         return self.db.get_single_film_no_bytes(uuid)
 
     def get_thumbnail(self, uuid: UUID) -> bytes:
+        """Gets thumbnail from cache or database.
+
+        Args:
+            uuid (UUID): uuid of film
+
+        Returns:
+            bytes: thumbnail bytes
+        """
         if uuid in self.cache.images:
             logging.info("Thumbnail found in cache. ")
             return Response(self.cache.images[uuid], media_type="image/png")
@@ -101,21 +126,56 @@ class Server:
         )
 
     def get_poster(self, uuid: UUID) -> bytes:
+        """Gets the poster. This isnt used much so it doesnt need to be cached.
+
+        Args:
+            uuid (UUID): uuid of film
+
+        Returns:
+            bytes: poster bytes
+        """
         return Response(self.db.get_film_poster(uuid), media_type="image/png")
 
     def get_film_rating(self, uuid: UUID) -> Rating:
+        """Gets rating of film.
+
+        Args:
+            uuid (UUID): uuid of film
+
+        Returns:
+            Rating: Rating object
+        """
         return self.db.get_rating(uuid)
 
     def set_rating(self, rating: Rating) -> Rating:
+        """Sets rating of film.
+
+        Args:
+            rating (Rating): Rating object
+
+        Returns:
+            Rating: Rating object
+        """
         self.db.update_rating(rating)
         return self.db.get_rating(rating.uuid)
 
     def set_watch_status(
         self, uuid: UUID = Query(...), watch_status: bool = Query(...)
     ) -> None:
+        """Sets watch status of film.
+
+        Args:
+            uuid (UUID, optional): uuid of film. Defaults to Query(...).
+            watch_status (bool, optional): new watch status. Defaults to Query(...).
+        """
         self.db.update_watch_status(uuid, watch_status)
 
     def get_all_actress_detail(self) -> list[ActressDetail]:
+        """Uses ReadCache to return cached data if possible. Otherwise, refreshes cache and returns refreshed data.
+
+        Returns:
+            list[ActressDetail]: _description_
+        """
         if (
             self.cache.actressesStamp is None
         ):  # first run, no stamp. Data must be outdated.
@@ -136,6 +196,7 @@ class Server:
         return self.cache.actresses  # return cache
 
     def get_available_storage(self) -> dict[str, int]:
+        """deprecated"""
         total, used, free = shutil.disk_usage(os.getenv("DOWNLOAD_PATH"))
         return {
             "total": int(total / 10**9),
@@ -144,10 +205,23 @@ class Server:
         }
 
     def delete_film(self, uuid: UUID = Query(...)) -> Response:
+        """Delete a film from the database
+
+        Args:
+            uuid (UUID, optional): uuid of film. Defaults to Query(...).
+
+        Returns:
+            Response: _description_
+        """
         self.db.delete_film(uuid)
         return Response(status_code=200)
 
     def diagnostics(self) -> dict[str, int | float | str | dict]:
+        """Diagnostic information about the server
+
+        Returns:
+            dict[str, int | float | str | dict]: diagnostic information
+        """
         total, used, free = shutil.disk_usage(os.getenv("DOWNLOAD_PATH"))
         start_time = time.perf_counter()
         self.db.get_all_films_no_bytes_with_rating_average()
@@ -167,9 +241,22 @@ class Server:
         }
 
     def get_indexed(self) -> list[IndexedNoBytes]:
+        """Returns all indexed items by count value
+
+        Returns:
+            list[IndexedNoBytes]: list of indexed items
+        """
         return self.db.get_by_count_indexed_no_bytes(100)
 
     def get_indexed_thumbnail(self, uuid: UUID = Query(...)) -> bytes:
+        """Uses cached thumbnails if available.
+
+        Args:
+            uuid (UUID, optional): uuid of indexed item. Defaults to Query(...).
+
+        Returns:
+            bytes: _description_
+        """
         if uuid in self.cache.images:
             logging.info("Thumbnail found in cache. ")
             return Response(self.cache.images[uuid], media_type="image/png")
