@@ -11,6 +11,7 @@ import { blogData, blogCategories } from 'data/blog';
 import IntlMessages from 'helpers/IntlMessages';
 import { useState, useEffect } from 'react';
 import { SliderTooltip, RangeTooltip } from 'components/common/SliderTooltips';
+import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 
 const Video = ({ poster, video }) => {
   return (
@@ -47,6 +48,7 @@ const Player = ({ match, uuid }) => {
   const [rating, setRating] = useState(null);
   const [userRating, setUserRating] = useState(null);
 
+  const history = useHistory();
   const updateUserRating = (newValue, key) => {
     setUserRating({ ...userRating, [key]: newValue });
   }
@@ -67,6 +69,15 @@ const Player = ({ match, uuid }) => {
       .catch(err => {
 
       })
+  }
+
+  const deleteFilm = () => {
+    fetch(`/api/delete?uuid=${film.uuid}`).then(res => {
+      setTimeout(async () => {
+        history.push("/foutre/cinema")
+      }, 1000)
+    })
+    
   }
 
 
@@ -113,7 +124,7 @@ const Player = ({ match, uuid }) => {
             <div className="d-flex justify-content-between">
               <h5 className="card-title">{film.title}</h5>
               <div>
-                <Button size={'xs'} color={'secondary'} className='mr-5 ml-1'>éliminer</Button>
+                <Button size={'xs'} color={'secondary'} className='mr-5 ml-1' onClick={deleteFilm}>éliminer</Button>
                 <Button size={'xs'} color={'primary'} className='mr-1 ml-1' outline>télécharger</Button>
               </div>
             </div>

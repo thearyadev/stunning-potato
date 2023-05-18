@@ -8,25 +8,21 @@ const TopnavDarkSwitch = () => {
   const [switchChecked, setSwitchChecked] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  useEffect(() => {
-    const color = getCurrentColor();
-    setSwitchChecked(color.indexOf('dark') > -1);
-  }, []);
+  
 
   const changeMode = () => {
-    let color = getCurrentColor();
+    const style = document.createElement("style");
+    if (!switchChecked){
+      style.textContent = "img{opacity: 0.1}"
+      style.id = "hideImages";
+      document.head.append(style);
+      setSwitchChecked(!switchChecked);
 
-    if (color.indexOf('dark') > -1) {
-      color = color.replace('dark', 'light');
-    } else if (color.indexOf('light') > -1) {
-      color = color.replace('light', 'dark');
+    }else{
+      document.getElementById("hideImages").remove();
+      setSwitchChecked(!switchChecked);
     }
-    setCurrentColor(color);
-    setSwitchChecked(color.indexOf('dark') > -1);
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
-  };
+  }
 
   return (
     <div className="d-none d-md-inline-block align-middle mr-3">
@@ -42,7 +38,7 @@ const TopnavDarkSwitch = () => {
         target="tooltip_switch"
         toggle={() => setTooltipOpen(!tooltipOpen)}
       >
-        Dark Mode
+        Hide Images
       </Tooltip>
     </div>
   );

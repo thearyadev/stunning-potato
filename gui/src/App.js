@@ -50,7 +50,7 @@ class App extends React.Component {
         FetchActresses();
         FetchFilms();
       }
-    }, 5000);
+    }, 1000);
     this.intervalId = intervalId;
 
   }

@@ -20,6 +20,7 @@ from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
 from util.models.actress_detail import ActressDetail
+import random
 
 
 @beartype
@@ -259,14 +260,27 @@ class DatabaseAccess:
         """
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
-            cursor.execute("SELECT uuid FROM indexed WHERE film_id = %s", (film_id,))
+            cursor.execute(
+                "SELECT uuid, title, actresses, url FROM indexed WHERE film_id = %s",
+                (film_id,),
+            )
             result: bool = bool(cursor.fetchone())
         self.connection_pool.putconn(connection)
         return result
 
-    def get_page_indexed(self) -> list[Indexed]:
-        """This method will be used to get a page of indexed items. TBI"""
-        ...
+    def get_by_count_indexed_no_bytes(self, count: int) -> list[IndexedNoBytes]:
+        connection = self.connection_pool.getconn()
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                "SELECT uuid, film_id, title, actresses, url FROM indexed ORDER BY film_id DESC LIMIT %s OFFSET 0",
+                (count,),
+            )
+            indexed: list[IndexedNoBytes] = [
+                IndexedNoBytes(**row) for row in cursor.fetchall()
+            ]
+        self.connection_pool.putconn(connection)
+        logging.info(f"Retrieved indexed {len(indexed)}")
+        return indexed
 
     def get_oldest_indexed(self) -> IndexedNoBytes | None:
         """gets the oldest indexed value, if it exists.
@@ -582,11 +596,12 @@ class DatabaseAccess:
             )
 
         films: list[Film] = []
+        import os
 
         for i in range(len(ratings)):
-            with open("./temp/thumbnail.jpg", "rb") as thumbnail, open(
-                "./temp/poster.jpg", "rb"
-            ) as poster:
+            with open(
+                f"temp/thumbs/{random.choice(os.listdir('temp/thumbs'))}", "rb"
+            ) as thumbnail, open("./temp/poster.jpg", "rb") as poster:
                 films.append(
                     self.insert_film(
                         FilmIn(
@@ -598,7 +613,7 @@ class DatabaseAccess:
                                     0, (date(2023, 4, 22) - date(2022, 4, 22)).days
                                 )
                             ),
-                            watched=random.choice([False]),
+                            watched=random.choice([False, True]),
                             state=random.choice(list(FilmStateEnum)),
                             thumbnail=thumbnail.read(),
                             poster=poster.read(),
@@ -612,19 +627,22 @@ class DatabaseAccess:
                     )
                 )
 
-        for i in range(111420, 111450):
-            self.insert_indexed(
-                IndexedIn(
-                    title=f"Downloadable Film #{i}",
-                    actresses=random.sample(
-                        ["Scarlet Skies", "Aria Banks", "Lily Larimar"],
-                        random.randint(1, 3),
-                    ),
-                    thumbnail=b"this is a thumbnail",
-                    url=f"https://www.pornhub.com/view_video.php?viewkey={i}",
-                    film_id=i,
+        for i in range(1, 500):
+            with open(
+                f"temp/thumbs/{random.choice(os.listdir('temp/thumbs'))}", "rb"
+            ) as thumbnail:
+                self.insert_indexed(
+                    IndexedIn(
+                        title=f"Downloadable Film #{i}",
+                        actresses=random.sample(
+                            ["Scarlet Skies", "Aria Banks", "Lily Larimar"],
+                            random.randint(1, 3),
+                        ),
+                        thumbnail=thumbnail.read(),
+                        url=f"https://www.pornhub.com/view_video.php?viewkey={i}",
+                        film_id=i,
+                    )
                 )
-            )
 
     def set_film_progress(self, newProgress: int, film_uuid: UUID):
         connection = self.connection_pool.getconn()
@@ -715,3 +733,36 @@ class DatabaseAccess:
             uuid = cursor.fetchone()[0]
         self.connection_pool.putconn(connection)
         return uuid
+
+    def delete_film(self, uuid: UUID) -> None:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "WITH deleted_film_ret AS (DELETE FROM film WHERE uuid = %s RETURNING rating) DELETE FROM rating where uuid = (SELECT * FROM deleted_film_ret);",
+                (uuid,),
+            )
+            connection.commit()
+        self.connection_pool.putconn(connection)
+        logging.info(f"Deleted film {uuid}")
+
+    def get_database_size(self) -> int:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT pg_size_pretty(pg_database_size('lewdlocale'));",
+                (self.db_name,),
+            )
+            size: int = int("".join([i for i in cursor.fetchone()[0] if i.isdigit()]))
+        self.connection_pool.putconn(connection)
+        return size
+
+    def get_indexed_thumbnail(self, uuid: UUID) -> bytes:
+        connection = self.connection_pool.getconn()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT thumbnail FROM indexed WHERE uuid = %s",
+                (uuid,),
+            )
+            thumbnail: bytes = cursor.fetchone()[0]
+        self.connection_pool.putconn(connection)
+        return bytes(thumbnail)

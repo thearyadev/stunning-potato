@@ -11,7 +11,7 @@
             "program": "launch.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["--app", "server", "--flush", "False", "--log-level", "CRITICAL"]
+            "args": ["--app", "server", "--flush", "False", "--log-level", "INFO"]
         },
         {
             "name": "Python: Current File",

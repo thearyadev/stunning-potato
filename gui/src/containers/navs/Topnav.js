@@ -31,6 +31,7 @@ import {
 
 import { MobileMenuIcon, MenuIcon } from 'components/svg';
 import { getDirection, setDirection } from 'helpers/Utils';
+import Switch from 'rc-switch';
 import TopnavEasyAccess from './Topnav.EasyAccess';
 import TopnavNotifications from './Topnav.Notifications';
 import TopnavDarkSwitch from './Topnav.DarkSwitch';
@@ -200,6 +201,7 @@ const TopNav = ({
   return (
     <nav className="navbar fixed-top">
       <div className="d-flex align-items-center navbar-left">
+
         <NavLink
           to="#"
           location={{}}
@@ -224,6 +226,9 @@ const TopNav = ({
         <span className="logo d-none d-xs-block h-100" />
         <span className="logo-mobile d-block d-xs-none" />
       </NavLink>
+      <div className="navbar-right pr-5">
+        <TopnavDarkSwitch />
+      </div>
 
     </nav>
   );

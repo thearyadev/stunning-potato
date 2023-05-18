@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS film (
     AND 100
   ),
   actresses text[] NOT NULL,
-  rating uuid REFERENCES rating(uuid)
+  rating uuid REFERENCES rating(uuid) ON DELETE CASCADE
 );
 
 -- Indexed

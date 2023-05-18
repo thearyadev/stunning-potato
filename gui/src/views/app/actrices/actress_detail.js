@@ -148,14 +148,11 @@ const ActressDetail = ({ match, actress }) => {
                               location={{}}
                               className="w-40 w-sm-100"
                             >
-                              <LazyLoad height={200} offset={1200} throttle={100}>
-
                                 <CardImg
                                   top
                                   alt={film.title}
                                   src={`/api/thumbnail?uuid=${film.uuid}`}
                                 />
-                              </LazyLoad>
                             </NavLink>
                           </div>
                           <CardBody>

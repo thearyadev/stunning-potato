@@ -16,30 +16,49 @@ const sortingOptions = [
   { value: "DAOF", label: "Date Added (Oldest First)" },
   { value: "UW", label: "Unwatched" },
   { value: "W", label: "Watched" },
-  { value: "RATING", label: "Rating" },
-  { value: "STORY", label: "Story" },
-  { value: "POSITIONS", label: "Positions" },
-  { value: "PUSSY", label: "Pussy" },
-  { value: "SHOTS", label: "Shots" },
-  { value: "HAIR", label: "Hair" },
-  { value: "BOOBS", label: "Boobs" },
-  { value: "BUTT", label: "Butt" },
-  { value: "FACE", label: "Face" },
-  { value: "REAR", label: "Rear View" },
-  { valueL: "DL", label: "Downloading" }
+  { value: "RLTH", label: "Rating (Low to High)" },
+  { value: "RHTL", label: "Rating (High to Low)" },
+  // { value: "STORY", label: "Story" },
+  // { value: "POSITIONS", label: "Positions" },
+  // { value: "PUSSY", label: "Pussy" },
+  // { value: "SHOTS", label: "Shots" },
+  // { value: "HAIR", label: "Hair" },
+  // { value: "BOOBS", label: "Boobs" },
+  // { value: "BUTT", label: "Butt" },
+  // { value: "FACE", label: "Face" },
+  // { value: "REAR", label: "Rear View" },
+  { value: "DL", label: "Downloading" }
 ]
 
+function sortFilms(filmArray) {
+  const sortingMethod = localStorage.getItem("sorting_method");
+  switch (sortingMethod){
+    case "DAOF":
+      return filmArray.sort((a, b) => new Date(a.date_added) - new Date(b.date_added))
+    case "UW":
+      return filmArray.filter(item => item.watched !== true && item.state === 'COMPLETE')
+    case "W":
+      return filmArray.filter(item => item.watched === true && item.state === 'COMPLETE')
+    case "RHTL":
+      return filmArray.filter(item => item.watched !== false && item.state === 'COMPLETE').sort((a, b) => b.average - a.average)
+    case "RLTH":
+      return filmArray.filter(item => item.watched !== false && item.state === 'COMPLETE').sort((a, b) => a.average - b.average)
+    case "DL":
+      return filmArray.filter(item => item.state !== 'COMPLETE')
+    default:
+      return filmArray.sort((a, b) => new Date(b.date_added) - new Date(a.date_added))
+  }
+}
 
-
+function setSortingMethod(method){
+  localStorage.setItem("sorting_method", method)
+}
 
 const Start = ({ match }) => {
   const [sortingDropdownOpen, setSortingDropdownOpen] = useState(false);
   const toggleSortingDropdown = () => setSortingDropdownOpen(!sortingDropdownOpen)
   const films = useSelector(state => state.films.films);
   setTimeout(async () => { document.querySelectorAll(".video-listing-card").forEach(element => { element.style.visibility = "visible" }) }, 1500)
-  const sort = (method) => {
-
-  }
   return <>
 
     <Row>
@@ -60,7 +79,7 @@ const Start = ({ match }) => {
           </DropdownToggle>
           <DropdownMenu>
             {sortingOptions.map((item) => (
-              <DropdownItem key={item.value}>
+              <DropdownItem key={item.value} onClick={() => setSortingMethod(item.value)}>
                 <IntlMessages id={item.label} />
               </DropdownItem>
             ))}
@@ -77,7 +96,7 @@ const Start = ({ match }) => {
 
         {/* this is the video library  */}
         <ListPageListing
-          items={films}
+          items={sortFilms([...films])}
           displayMode={"imagelist"}
           selectedItems={[]}
           onCheckItem={() => { }}
