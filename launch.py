@@ -67,7 +67,6 @@ db = DatabaseAccess(
     db_name=os.getenv("DB_NAME"),
 )
 # db.drop()
-db.initialize(Path("./util/database/tables.sql"))
 if args.flush == "True":
     db.drop()
     db.initialize(Path("./util/database/tables.sql"))
