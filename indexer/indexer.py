@@ -51,7 +51,6 @@ def index(film_id: int) -> IndexedIn:
         duration=duration,
     )
     logging.info(f"Indexed film {film_id}")
-    1 / 0
     return indexed
 
 

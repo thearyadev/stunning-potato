@@ -75,7 +75,6 @@ def get_film_duration(document: BeautifulSoup) -> timedelta:
     """
     abc = str(document)
 
-    
     time_text: str = document.find("li", class_="fa-clock-o").text
     components: list[str] = time_text.split()
     delta: timedelta = timedelta()
@@ -164,5 +163,7 @@ def generate_thumbnail(poster: bytes) -> bytes:
     with BytesIO(poster) as f:
         image = Image.open(f)
         image.thumbnail((400, 225))
+        thumbnail_buffer = BytesIO()
+        image.save(thumbnail_buffer, "PNG")
         logging.info("Thumbnail generated")
-        return image.tobytes()
+        return thumbnail_buffer.getvalue()
