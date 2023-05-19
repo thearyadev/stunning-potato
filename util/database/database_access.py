@@ -1,6 +1,6 @@
 import logging
 import random
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from pathlib import Path
 from uuid import UUID
 
@@ -780,7 +780,7 @@ class DatabaseAccess:
         logging.info(f"Updated watch status for film {uuid}")
         self.connection_pool.putconn(connection)
 
-    def get_latest_commit_uuid(self) -> UUID:
+    def get_latest_commit_uuid(self) -> UUID | None:
         """The database has a trigger which runs on every database operation (other than read.)
         This trigger inserts a new row into the history table.
         this table is used to track when the database data has changed, and to only

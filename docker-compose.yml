@@ -1,46 +1,49 @@
 version: "3.9"
 services:
-  server:
-    build:
-      context: .
-      dockerfile: ./server/Dockerfile
-    env_file:
-      - docker.env
-    depends_on:
-      - postgres
-    ports:
-      - "8080:8000"
-    volumes:
-      - ./temp/films:/lewdlocale/films
-      - ./temp/errors:/lewdlocale/errors
-    networks:
-      lewdlocale:
+  # server:
+  #   build:
+  #     context: .
+  #     dockerfile: ./server/Dockerfile
+  #   env_file:
+  #     - docker.env
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "8080:8000"
+  #   volumes:
+  #     - ./temp/films:/lewdlocale/films
+  #     - ./temp/errors:/lewdlocale/errors
+  #   networks:
+  #     lewdlocale:
+  #   restart: on-failure:3
   
-  indexer:
-    build:
-      context: .
-      dockerfile: ./indexer/Dockerfile
-    env_file:
-      - docker.env
-    depends_on:
-      - postgres
-    volumes:
-      - ./temp/errors:/lewdlocale/errors
-    networks:
-      lewdlocale:
+  # indexer:
+  #   build:
+  #     context: .
+  #     dockerfile: ./indexer/Dockerfile
+  #   env_file:
+  #     - docker.env
+  #   depends_on:
+  #     - postgres
+  #   volumes:
+  #     - ./temp/errors:/lewdlocale/errors
+  #   networks:
+  #     lewdlocale:
+  #   restart: on-failure:3
     
-  downloader:
-    build:
-      context: .
-      dockerfile: ./downloader/Dockerfile
-    env_file:
-      - docker.env
-    depends_on:
-      - postgres
-    volumes:
-      - ./temp/errors:/lewdlocale/errors
-    networks:
-      lewdlocale:
+  # downloader:
+  #   build:
+  #     context: .
+  #     dockerfile: ./downloader/Dockerfile
+  #   env_file:
+  #     - docker.env
+  #   depends_on:
+  #     - postgres
+  #   volumes:
+  #     - ./temp/errors:/lewdlocale/errors
+  #   networks:
+  #     lewdlocale:
+  #   restart: on-failure:3
 
 
   postgres:
@@ -51,10 +54,12 @@ services:
       - ./temp/pg-data:/var/lib/postgresql/data # replace with on-system path
    # ports:
    #  - "5433:5432" # for external access
-    restart: always
+    restart: on-failure:3
     hostname: postgres
     networks:
       lewdlocale:
+    ports:
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lewdlocale"]
       interval: 10s

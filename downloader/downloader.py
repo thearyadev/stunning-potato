@@ -12,6 +12,7 @@ from util.models.film import Film, FilmStateEnum
 from util.models.queue import Queue
 from util.scraper.detail_page import get_download_url, get_iframe_source
 from util.scraper.document import get_document
+import requests
 
 
 @beartype
@@ -44,15 +45,17 @@ class Downloader:
             time.sleep(5)
 
     def download(self, url: str, film: Film) -> None:
-        def report_hook(count: int, block_size: int, total_size: int):
-            progress: int = int(count * block_size * 100 / total_size)
-            if progress % 10 == 0 and progress != self.last_reported_progress:
-                self.last_reported_progress = progress
-                print(f"{progress}%")
-
-        fname = rf"{self.download_path}/{film.filename}"
-        urllib.request.urlretrieve(
-            url,
-            r"F:\temp_downloads\test.mp4",
-            reporthook=report_hook,
-        )
+        response = requests.get(url, stream=True)
+        total_size = int(response.headers.get("content-length", 0))
+        download_size = 0
+        last_reported_progress = 0
+        with open(Path(os.getenv("DOWNLOAD_PATH")).joinpath(film.filename), "wb") as f:
+            for data in response.iter_content(chunk_size=4096):
+                download_size += len(data)
+                f.write(data)
+                f.flush()
+                progress = int((download_size / total_size) * 100)
+                print(f"{progress}%. [{progress == last_reported_progress}]")
+                if progress != last_reported_progress:
+                    self.db.set_film_progress(newProgress=progress, film_uuid=film.uuid)
+                    last_reported_progress = progress

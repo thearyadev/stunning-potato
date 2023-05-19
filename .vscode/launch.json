@@ -22,6 +22,16 @@
             "justMyCode": true,
             "args": ["--app", "indexer", "--flush", "False", "--log-level", "INFO"]
         },
+
+        {
+            "name": "LAUNCH: Downloader",
+            "type": "python",
+            "request": "launch",
+            "program": "launch.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--app", "downloader", "--flush", "False", "--log-level", "INFO"]
+        },
         {
             "name": "Python: Current File",
             "type": "python",

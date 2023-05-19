@@ -238,7 +238,13 @@ class Server:
         Returns:
             Response: _description_
         """
-        self.db.delete_film(uuid)
+        film: Film = self.db.get_film_no_bytes(uuid)
+        full_file_to_delete: Path = Path(os.getenv("DOWNLOAD_PATH")).joinpath(
+            film.filename
+        )
+        if os.path.isfile(full_file_to_delete):
+            os.remove(full_file_to_delete)
+        self.db.delete_film(film.uuid)
         return Response(status_code=200)
 
     def diagnostics(self) -> dict[str, int | float | str | dict]:
