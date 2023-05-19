@@ -65,8 +65,8 @@ class Indexer:
         self,
         databaseAccess: DatabaseAccess,
         *,
-        sleep_time: int = 15,
-        iterator_sleep_time: int = 1,
+        sleep_time: int = 200,
+        iterator_sleep_time: int = 5,
     ):
         self.db = databaseAccess
         self.sleep_time = sleep_time
