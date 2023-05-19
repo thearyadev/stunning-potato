@@ -52,7 +52,6 @@ services:
       - docker.env
     volumes:
       - /remote/xxx/database:/var/lib/postgresql/data # replace with on-system path
-    user: "0:0"
     ports:
       - "5433:5432" # for external access
     restart: on-failure:3
