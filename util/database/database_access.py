@@ -794,7 +794,10 @@ class DatabaseAccess:
             cursor.execute(
                 "SELECT * FROM history ORDER BY timestamp DESC LIMIT 1",
             )
-            uuid = cursor.fetchone()[0]
+            try:
+                uuid = cursor.fetchone()[0]
+            except TypeError:
+                uuid = None
         self.connection_pool.putconn(connection)
         logging.info(f"Retrieved latest commit uuid {uuid}")
         return uuid
