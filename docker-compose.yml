@@ -17,33 +17,33 @@ services:
       lewdlocale:
     restart: on-failure:3
   
-  # indexer:
-  #   build:
-  #     context: .
-  #     dockerfile: ./indexer/Dockerfile
-  #   env_file:
-  #     - docker.env
-  #   depends_on:
-  #     - postgres
-  #   volumes:
-  #     - ./temp/errors:/lewdlocale/errors
-  #   networks:
-  #     lewdlocale:
-  #   restart: on-failure:3
+  indexer:
+    build:
+      context: .
+      dockerfile: ./indexer/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      - postgres
+    volumes:
+      - /remote/xxx/errors:/lewdlocale/errors
+    networks:
+      lewdlocale:
+    restart: on-failure:3
     
-  # downloader:
-  #   build:
-  #     context: .
-  #     dockerfile: ./downloader/Dockerfile
-  #   env_file:
-  #     - docker.env
-  #   depends_on:
-  #     - postgres
-  #   volumes:
-  #     - ./temp/errors:/lewdlocale/errors
-  #   networks:
-  #     lewdlocale:
-  #   restart: on-failure:3
+  downloader:
+    build:
+      context: .
+      dockerfile: ./downloader/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      - postgres
+    volumes:
+      - /remote/xxx/errors:/lewdlocale/errors
+    networks:
+      lewdlocale:
+    restart: on-failure:3
 
 
   postgres:
@@ -52,14 +52,12 @@ services:
       - docker.env
     volumes:
       - ../POSTGRESQL_DATA:/var/lib/postgresql/data # replace with on-system path
-   # ports:
-   #  - "5433:5432" # for external access
+    ports:
+      - "5433:5432" # for external access
     restart: on-failure:3
     hostname: postgres
     networks:
       lewdlocale:
-    ports:
-      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lewdlocale"]
       interval: 10s
