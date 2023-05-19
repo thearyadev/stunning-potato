@@ -15,13 +15,15 @@ def dict_factory(cursor, row):
 
 
 dest_db = DatabaseAccess(
-    db_host="localhost",
+    db_host="192.168.50.190",
     db_port=5433,
     db_name="lewdlocale",
     db_user="lewdlocale",
     db_password="lewdlocale",
 )
-
+dest_db.initialize(Path("./util/database/tables.sql"))
+print(dest_db.get_actress_detail_all())
+input()
 src_db = sqlite3.connect("films.db")
 src_db.row_factory = dict_factory
 cur = src_db.cursor()
@@ -63,4 +65,3 @@ for i in cur.fetchall():
         download_progress=100,
     )
     dest_db.insert_film(film)
-    

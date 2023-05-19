@@ -1,21 +1,21 @@
 version: "3.9"
 services:
-  # server:
-  #   build:
-  #     context: .
-  #     dockerfile: ./server/Dockerfile
-  #   env_file:
-  #     - docker.env
-  #   depends_on:
-  #     - postgres
-  #   ports:
-  #     - "8080:8000"
-  #   volumes:
-  #     - ./temp/films:/lewdlocale/films
-  #     - ./temp/errors:/lewdlocale/errors
-  #   networks:
-  #     lewdlocale:
-  #   restart: on-failure:3
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8000"
+    volumes:
+      - /remote/xxx/films:/lewdlocale/films
+      - /remote/xxx/errors:/lewdlocale/errors
+    networks:
+      lewdlocale:
+    restart: on-failure:3
   
   # indexer:
   #   build:
