@@ -1,24 +1,29 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import uvicorn
 from fastapi import APIRouter, FastAPI, Query
-from fastapi.responses import Response
+from fastapi.responses import Response, FileResponse, StreamingResponse
 
 from util.database.database_access import DatabaseAccess
 from util.models.film import FilmNoBytes, FilmNoBytesWithAverage
 from util.models.rating import Rating, RatingIn
 from util.models.actress_detail import ActressDetail
 from util.models.indexed import IndexedNoBytes
+from util.models.queue import QueueIn
+from util.models.film import FilmIn, FilmStateEnum, Film
 import shutil
 import os
 import logging
 import sys
 import pickle
 import time
+import datetime
+from pathlib import Path
 
 
 class ReadCache:
     """Cache for read operations. This is used to reduce the number of database calls."""
+
     def __init__(self) -> None:
         self.films: list[FilmNoBytesWithAverage] = []
         self.filmsStamp: UUID = None
@@ -27,7 +32,6 @@ class ReadCache:
         self.actressesStamp: UUID = None
 
         self.images: dict[UUID, bytes] = {}
-        
 
 
 class Server:
@@ -58,13 +62,15 @@ class Server:
         self.router.add_api_route(
             "/storage", self.get_available_storage, methods=["GET"]
         )
+        self.router.add_api_route("/v", self.serve_video, methods=["GET"])
+        self.router.add_api_route("/queue_add", self.add_to_queue, methods=["POST"])
 
         self.router.add_api_route("/diagnostics", self.diagnostics, methods=["GET"])
         self.app.include_router(self.router)
         self.cache = ReadCache()
 
     def main_loop(self):
-        uvicorn.run(self.app, port=8000)
+        uvicorn.run(self.app, port=8000, host="0.0.0.0")
 
     def get_films_no_bytes_with_average(self) -> list[FilmNoBytesWithAverage]:
         """Queries all records in the films table. This is cached. If the cache is outdated, it will be refreshed.
@@ -268,3 +274,61 @@ class Server:
             imageBytes,
             media_type="image/png",
         )
+
+    def add_to_queue(self, queueItems: list[UUID]) -> Response:
+        """Adds items to queue
+
+        Args:
+            queueItems (list[UUID]): list of uuids to add to queue
+
+        Returns:
+            Response: status
+        """
+        for i in queueItems:
+            indexed_queue_item = self.db.get_indexed(i)
+
+            # add rating record
+            rating: Rating = self.db.insert_rating(
+                RatingIn(
+                    story=0, positions=0, pussy=0, shots=0, boobs=0, face=0, rearview=0
+                )
+            )
+            # add film record
+            film: Film = self.db.insert_film(
+                FilmIn(
+                    title=indexed_queue_item.title,
+                    duration=indexed_queue_item.duration,
+                    date_added=datetime.datetime.now(),  # gen cur date
+                    filename=f"{uuid4().hex}.mp4",  # gen filename
+                    watched=False,
+                    state=FilmStateEnum.IN_QUEUE,
+                    actresses=indexed_queue_item.actresses,
+                    thumbnail=indexed_queue_item.thumbnail,
+                    poster=indexed_queue_item.poster,
+                    download_progress=0,  # default value
+                    rating=rating.uuid,  # get rating uuid
+                )
+            )
+
+            self.db.insert_queue(
+                # url to get from             # film record uuid
+                QueueIn(url=indexed_queue_item.url, film_uuid=film.uuid)
+            )
+
+        return Response(status_code=200)
+
+    def serve_video(self, uuid: UUID = Query(...)) -> FileResponse:
+        """Serves video file
+
+        Args:
+            uuid (UUID, optional): uuid of film. Defaults to Query(...).
+
+        Returns:
+            Response: video file
+        """
+        response = FileResponse(
+            Path(os.getenv("DOWNLOAD_PATH")).joinpath(self.db.get_film(uuid).filename),
+            media_type="video/mp4",
+        )
+        response.headers["Accept-Ranges"] = "bytes"
+        return response

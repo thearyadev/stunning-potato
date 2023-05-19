@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from uuid import UUID
+from datetime import timedelta
 
 
 @dataclass
@@ -8,7 +9,9 @@ class IndexedIn:
     title: str
     actresses: list[str]
     thumbnail: bytes
+    poster: bytes
     url: str
+    duration: timedelta
 
     def __repr__(
         self,
@@ -28,7 +31,9 @@ class Indexed:
     title: str
     actresses: list[str]
     thumbnail: bytes | memoryview
+    poster: bytes | memoryview
     url: str
+    duration: timedelta
 
     def __repr__(
         self,
@@ -49,6 +54,7 @@ class IndexedNoBytes:
     title: str
     actresses: list[str]
     url: str
+    duration: timedelta
 
     def __repr__(
         self,

@@ -53,19 +53,40 @@ html {
 .slider-container>div>span>div.rc-slider-tooltip {
     visibility: hidden;
 }
-.video-listing-card{
+
+.video-listing-card {
     visibility: hidden;
 }
 
-.of-style-none{
-    scrollbar-width: none; /* hide scrollbar for Firefox */
-    -ms-overflow-style: none; /* hide scrollbar for Internet Explorer 10+ */
+.of-style-none {
+    scrollbar-width: none;
+    /* hide scrollbar for Firefox */
+    -ms-overflow-style: none;
+    /* hide scrollbar for Internet Explorer 10+ */
     border-radius: .25rem;
 }
-.of-style-none::-webkit-scrollbar {
-    width: 0 !important; /* hide scrollbar for Chrome, Safari, and Opera */
-  }
 
-img{
+.of-style-none::-webkit-scrollbar {
+    width: 0 !important;
+    /* hide scrollbar for Chrome, Safari, and Opera */
+}
+
+img {
     transition: opacity 0.5s ease-in-out;
+}
+
+.fCountIndicator {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 15px;
+    background-color: #333;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.fCountIndicator:hover{
+    cursor: pointer;
+    opacity: 0.8;
 }

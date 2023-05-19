@@ -71,7 +71,9 @@ CREATE TABLE IF NOT EXISTS indexed (
   title text NOT NULL,
   actresses text [] NOT NULL,
   thumbnail bytea NOT NULL,
-  url text NOT NULL
+  poster bytea NOT NULL,
+  url text NOT NULL,
+  duration interval NOT NULL
 );
 
 -- Queue

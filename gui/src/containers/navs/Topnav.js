@@ -207,7 +207,7 @@ const TopNav = ({
           location={{}}
           className="menu-button d-none d-md-block"
           onClick={(e) =>
-            history.push("/foutre/accueil")
+            menuButtonClick(e, menuClickCount, containerClassnames)
           }
         >
           <MenuIcon />
@@ -222,7 +222,7 @@ const TopNav = ({
         </NavLink>
 
       </div>
-      <NavLink className="navbar-logo" to={adminRoot}>
+      <NavLink className="navbar-logo" to="/">
         <span className="logo d-none d-xs-block h-100" />
         <span className="logo-mobile d-block d-xs-none" />
       </NavLink>

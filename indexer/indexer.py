@@ -40,12 +40,15 @@ def index(film_id: int) -> IndexedIn:
     )  # get the document from the iframe source
     poster = get_poster(iframe_document)
     thumbnail = generate_thumbnail(poster)
+    duration = get_film_duration(document)
     indexed: IndexedIn = IndexedIn(
         film_id=film_id,
         title=title,
         actresses=actresses,
         thumbnail=thumbnail,
         url=url,
+        poster=poster,
+        duration=duration,
     )
     logging.info(f"Indexed film {film_id}")
     return indexed

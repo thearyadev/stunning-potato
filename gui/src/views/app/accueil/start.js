@@ -6,6 +6,8 @@ import Breadcrumb from 'containers/navs/Breadcrumb';
 import { Card, CardBody, CardTitle, CardHeader } from 'reactstrap';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import { useEffect } from 'react';
+import data from 'data/iconCards';
+import IconCard from 'components/cards/IconCard';
 
 const RadialProgressCard = ({
   title = 'title',
@@ -36,14 +38,14 @@ const RadialProgressCard = ({
 };
 
 const Start = ({ match }) => {
-  const [percent, setPercent] = React.useState(0);
+  const [diagnosticData, setDiagnosticData] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
   useEffect(() => {
-    fetch("/api/storage")
+    fetch("/api/diagnostics")
       .then(res => res.json())
-      .then(data => { setPercent((data.used / data.total) * 100); })
+      .then(d => { setDiagnosticData(d) })
+      .then(() => setLoading(false))
   }, [])
-
-
   return (
     <>
       <Row>
@@ -56,9 +58,31 @@ const Start = ({ match }) => {
         <Colxx xxs="12" className="mb-4">
           <RadialProgressCard
             title='Storage Used'
-            percent={percent}
+            percent={diagnosticData?.disk?.used / diagnosticData?.disk?.total * 100}
           />
 
+        </Colxx>
+        <Colxx xxs="12" className="mb-4">
+          <Row className="icon-cards-row mb-2">
+            <Colxx xxs="6" sm="4" md="3" lg="2">
+              <IconCard {...{ title: 'Cache Size', icon: "iconsminds-arrow-refresh", value: `${Math.round(diagnosticData?.cache_size/1000/1000)} MB` }} className="mb-4 w-100" />
+            </Colxx>
+            <Colxx xxs="6" sm="4" md="3" lg="2">
+              <IconCard {...{ title: 'Database Size', icon: "iconsminds-arrow-refresh", value: `${diagnosticData?.database?.size} MB` }} className="mb-4 w-100" />
+            </Colxx>
+            <Colxx xxs="6" sm="4" md="3" lg="2">
+              <IconCard {...{ title: 'Database Query Time', icon: "iconsminds-arrow-refresh", value: `${Math.round(diagnosticData?.database?.query_time * 1000)} MS` }} className="mb-4 w-100" />
+            </Colxx>
+            <Colxx xxs="6" sm="4" md="3" lg="2">
+              <IconCard {...{ title: 'Storage Total', icon: "iconsminds-arrow-refresh", value: `${diagnosticData?.disk?.total} GB`}} className="mb-4 w-100" />
+            </Colxx>
+            <Colxx xxs="6" sm="4" md="3" lg="2">
+              <IconCard {...{ title: 'Storage Used', icon: "iconsminds-arrow-refresh", value: `${diagnosticData?.disk?.used} GB`}} className="mb-4 w-100" />
+            </Colxx>
+            <Colxx xxs="6" sm="4" md="3" lg="2">
+              <IconCard {...{ title: 'Storage Free', icon: "iconsminds-arrow-refresh", value: `${diagnosticData?.disk?.free} GB`}} className="mb-4 w-100" />
+            </Colxx>
+          </Row>
         </Colxx>
       </Row>
     </>

@@ -21,6 +21,10 @@ from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
 from util.models.actress_detail import ActressDetail
 import random
+import time
+
+MAX_RETRIES = 10
+RETRY_INTERVAL = 3
 
 
 @beartype
@@ -34,26 +38,39 @@ class DatabaseAccess:
         db_password: str,
         db_host: str,
         db_port: int,
-        max_connections: int = 5,
+        max_connections: int = 15,
         min_connections: int = 1,
     ):
-        self.db_name = db_name # db connection creds
+        self.db_name = db_name  # db connection creds
         self.db_user = db_user
         self.db_password = db_password
         self.db_host = db_host
         self.db_port = db_port
-        self.min_connections = min_connections # for connection pool
+        self.min_connections = min_connections  # for connection pool
         self.max_connections = max_connections
-        register_uuid() # allows use of UUID objects in psycopg2
-        self.connection_pool = pool.SimpleConnectionPool(
-            host=self.db_host,
-            port=self.db_port,
-            dbname=self.db_name,
-            user=self.db_user,
-            password=self.db_password,
-            minconn=self.min_connections,
-            maxconn=self.max_connections,
-        )
+        register_uuid()  # allows use of UUID objects in psycopg2
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                self.connection_pool = pool.SimpleConnectionPool(
+                    host=self.db_host,
+                    port=self.db_port,
+                    dbname=self.db_name,
+                    user=self.db_user,
+                    password=self.db_password,
+                    minconn=self.min_connections,
+                    maxconn=self.max_connections,
+                )
+                break
+            except psycopg2.OperationalError as e:
+                logging.warning(
+                    f"Attempt {attempt} of {MAX_RETRIES} to connect to database failed. Retrying in {RETRY_INTERVAL} seconds with credentials: {self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}"
+                )
+                time.sleep(RETRY_INTERVAL)
+        else:
+            logging.critical(
+                f"Failed to connect to database after {MAX_RETRIES} attempts. Exiting."
+            )
+            exit(1)
 
         logging.info("Connected to database")
 
@@ -184,13 +201,15 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO indexed (title, actresses, thumbnail, url, film_id) VALUES (%s, %s, %s, %s, %s) RETURNING uuid",
+                "INSERT INTO indexed (title, actresses, thumbnail, poster, url, film_id, duration) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING uuid",
                 (
                     indexed.title,
                     indexed.actresses,
                     indexed.thumbnail,
+                    indexed.poster,
                     indexed.url,
                     indexed.film_id,
+                    indexed.duration,
                 ),
             )
             logging.info(f"Inserted indexed {indexed}")
@@ -237,7 +256,7 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                "SELECT uuid, title, actresses, thumbnail, url, film_id FROM indexed WHERE uuid = %s",
+                "SELECT uuid, title, actresses, url, film_id, duration FROM indexed WHERE uuid = %s",
                 (uuid,),
             )
             if (query_result := cursor.fetchone()) is not None:
@@ -261,7 +280,7 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT uuid, title, actresses, url FROM indexed WHERE film_id = %s",
+                "SELECT uuid, title, actresses, url, duration FROM indexed WHERE film_id = %s",
                 (film_id,),
             )
             result: bool = bool(cursor.fetchone())
@@ -280,7 +299,7 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                "SELECT uuid, film_id, title, actresses, url FROM indexed ORDER BY film_id DESC LIMIT %s OFFSET 0",
+                "SELECT uuid, film_id, title, actresses, url, duration FROM indexed ORDER BY film_id DESC LIMIT %s OFFSET 0",
                 (count,),
             )
             indexed: list[IndexedNoBytes] = [
@@ -299,7 +318,7 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                "SELECT uuid, title, actresses, thumbnail, url, film_id FROM indexed ORDER BY film_id ASC LIMIT 1",
+                "SELECT uuid, title, actresses, thumbnail, url, film_id, poster, duration FROM indexed ORDER BY film_id ASC LIMIT 1",
             )
             if (query_result := cursor.fetchone()) is not None:
                 indexed: IndexedNoBytes = IndexedNoBytes(**query_result)
@@ -474,10 +493,10 @@ class DatabaseAccess:
                 "INSERT INTO queue (url, film_uuid) VALUES (%s, %s) RETURNING uuid",
                 (queue.url, queue.film_uuid),
             )
-            queue_inserted = Queue(uuid=cursor.fetchone()[0], **queue.dict())
+            queue_inserted = Queue(uuid=cursor.fetchone()[0], **queue.__dict__)
             connection.commit()
         logging.info(f"Inserted queue {queue_inserted}")
-        connection = self.connection_pool.putconn()
+        self.connection_pool.putconn(connection)
         return queue_inserted
 
     def get_and_pop_queue(self) -> Queue | None:
@@ -638,7 +657,7 @@ class DatabaseAccess:
         for i in range(1, 500):
             with open(
                 f"temp/thumbs/{random.choice(os.listdir('temp/thumbs'))}", "rb"
-            ) as thumbnail:
+            ) as thumbnail, open("./temp/poster.jpg", "rb") as poster:
                 self.insert_indexed(
                     IndexedIn(
                         title=f"Downloadable Film #{i}",
@@ -647,8 +666,10 @@ class DatabaseAccess:
                             random.randint(1, 3),
                         ),
                         thumbnail=thumbnail.read(),
-                        url=f"https://www.pornhub.com/view_video.php?viewkey={i}",
+                        poster=poster.read(),
+                        url=f"https://hqporner.com/hdporn/{i}.html",
                         film_id=i,
+                        duration=timedelta(seconds=random.randint(500, 5000)),
                     )
                 )
 
@@ -676,7 +697,7 @@ class DatabaseAccess:
             uuid (UUID): uuid of the film to retrieve
 
         Returns:
-            FilmNoBytes | None: Film object with no bytes values, or None if not found. 
+            FilmNoBytes | None: Film object with no bytes values, or None if not found.
         """
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
@@ -698,8 +719,8 @@ class DatabaseAccess:
 
         Returns:
             list[ActressDetail]: list of ActressDetail objects
-        """        
-        
+        """
+
         connection = self.connection_pool.getconn()
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             # this gets all the actresses and calculates their average rating for each category
@@ -763,7 +784,7 @@ class DatabaseAccess:
         """The database has a trigger which runs on every database operation (other than read.)
         This trigger inserts a new row into the history table.
         this table is used to track when the database data has changed, and to only
-        rehydrate the server state once it has. 
+        rehydrate the server state once it has.
 
         Returns:
             UUID: uuid of the latest commit

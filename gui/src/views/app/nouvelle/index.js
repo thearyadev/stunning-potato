@@ -7,9 +7,9 @@ const Start = React.lazy(() =>
 const Nouvelle = ({ match }) => (
   <Suspense fallback={<div className="loading" />}>
     <Switch>
-      <Redirect exact from={`${match.url}/`} to={`${match.url}/second`} />
+      <Redirect exact from={`${match.url}/`} to={`${match.url}/sélection`} />
       <Route
-        path={`${match.url}/second`}
+        path={`${match.url}/sélection`}
         render={(props) => <Start {...props} />}
       />
       <Redirect to="/error" />

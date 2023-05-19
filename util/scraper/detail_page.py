@@ -73,6 +73,9 @@ def get_film_duration(document: BeautifulSoup) -> timedelta:
     Returns:
         timedelta: film duration
     """
+    abc = str(document)
+
+    
     time_text: str = document.find("li", class_="fa-clock-o").text
     components: list[str] = time_text.split()
     delta: timedelta = timedelta()

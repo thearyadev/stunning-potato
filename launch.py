@@ -34,7 +34,6 @@ db = DatabaseAccess(
     db_password=os.getenv("DB_PASS"),
     db_name=os.getenv("DB_NAME"),
 )
-db.initialize(Path("./util/database/tables.sql"))
 
 if args.flush == "True":
     db.drop()
@@ -44,6 +43,7 @@ if args.flush == "True":
 if __name__ == "__main__":
     match args.app:
         case "server":
+            db.initialize(Path("./util/database/tables.sql"))
             Server(databaseAccess=db).main_loop()
         case "downloader":
             Downloader(databaseAccess=db).main_loop()

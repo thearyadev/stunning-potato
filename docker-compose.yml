@@ -1,29 +1,61 @@
 version: "3.9"
 services:
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./temp/films:/lewdlocale/films
+    networks:
+      lewdlocale:
+  
+  indexer:
+    build:
+      context: .
+      dockerfile: ./indexer/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      - postgres
+    networks:
+      lewdlocale:
+    
   downloader:
-    build: .
+    build:
+      context: .
+      dockerfile: ./downloader/Dockerfile
     env_file:
-      - .env
-    args: 
-      SERVICE: downloader
-  
-  indxer:
-    build: .
-    env_file:
-      - .env
-    args: 
-      SERVICE: indexer
-  
-  database:
-    image: postgres:13-alpine
+      - docker.env
+    depends_on:
+      - postgres
+    networks:
+      lewdlocale:
+
+
+  postgres:
+    image: postgres:15.3-alpine
     env_file:
       - .env
     volumes:
-      - db-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - ./temp/pg-data:/var/lib/postgresql/data # replace with on-system path
+   # ports:
+   #  - "5433:5432" # for external access
     restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+    hostname: postgres
+    networks:
+      lewdlocale:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lewdlocale"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+networks:
+  lewdlocale:
+    driver: bridge

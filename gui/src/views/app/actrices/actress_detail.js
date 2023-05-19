@@ -69,8 +69,8 @@ const ActressDetail = ({ match, actress }) => {
 
           <Row>
             <Colxx xxs="12" lg="4" className="mb-4 col-left">
-              <Card className="mb-4">
-                <CardBody>
+              <Card className="mb-4" style={{position: "sticky", top: 130}}>
+                <CardBody class="" >
                   <CardTitle>
                     <IntlMessages id="performance" />
                   </CardTitle>
@@ -130,7 +130,6 @@ const ActressDetail = ({ match, actress }) => {
 
             <Colxx xxs="12" lg="8" className="mb-4 col-right">
               {/* PRODS */}
-              <Container style={{ height: '77vh', overflowY: 'scroll' }} className='of-style-none'>
                 <Row>
                   {actressFilms.map((film) => {
                     return (
@@ -148,11 +147,14 @@ const ActressDetail = ({ match, actress }) => {
                               location={{}}
                               className="w-40 w-sm-100"
                             >
+                              <LazyLoad height={200} offset={1200} throttle={100}>
+
                                 <CardImg
                                   top
                                   alt={film.title}
                                   src={`/api/thumbnail?uuid=${film.uuid}`}
                                 />
+                              </LazyLoad>
                             </NavLink>
                           </div>
                           <CardBody>
@@ -172,7 +174,6 @@ const ActressDetail = ({ match, actress }) => {
                     );
                   })}
                 </Row>
-              </Container>
 
 
             </Colxx>

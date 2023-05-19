@@ -118,7 +118,7 @@ const Player = ({ match, uuid }) => {
         <Card className="mb-4">
           <Video
             poster={`/api/poster?uuid=${film.uuid}`}
-            video={'http://xxx.elfie.local/films/v?id=863'}
+            video={`/api/v?uuid=${film.uuid}`}
           />
           <CardBody>
             <div className="d-flex justify-content-between">

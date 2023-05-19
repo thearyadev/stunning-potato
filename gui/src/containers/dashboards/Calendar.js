@@ -2,12 +2,12 @@ import React from 'react';
 import { Card, CardBody, CardTitle } from 'reactstrap';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
+import { getDirection } from 'helpers/Utils';
 
 import CalendarToolbar from 'components/CalendarToolbar';
 import IntlMessages from 'helpers/IntlMessages';
 import data from '../../data/events';
 
-import { getDirection } from 'helpers/Utils';
 
 const localizer = momentLocalizer(moment);
 
