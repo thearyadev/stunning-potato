@@ -851,4 +851,5 @@ class DatabaseAccess:
             thumbnail: bytes = cursor.fetchone()[0]
         self.connection_pool.putconn(connection)
         logging.info("Retrieved thumbnail")
+
         return bytes(thumbnail)

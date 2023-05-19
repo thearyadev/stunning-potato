@@ -12,6 +12,7 @@ services:
       - "8080:8000"
     volumes:
       - ./temp/films:/lewdlocale/films
+      - ./temp/errors:lewdlocale/errors
     networks:
       lewdlocale:
   
@@ -23,6 +24,8 @@ services:
       - docker.env
     depends_on:
       - postgres
+    volumes:
+      - ./temp/errors:lewdlocale/errors
     networks:
       lewdlocale:
     
@@ -34,6 +37,8 @@ services:
       - docker.env
     depends_on:
       - postgres
+    volumes:
+      - ./temp/errors:lewdlocale/errors
     networks:
       lewdlocale:
 

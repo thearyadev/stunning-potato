@@ -2,7 +2,7 @@ from uuid import UUID, uuid4
 
 import uvicorn
 from fastapi import APIRouter, FastAPI, Query
-from fastapi.responses import Response, FileResponse, StreamingResponse
+from fastapi.responses import Response, FileResponse, StreamingResponse, HTMLResponse
 
 from util.database.database_access import DatabaseAccess
 from util.models.film import FilmNoBytes, FilmNoBytesWithAverage
@@ -19,6 +19,19 @@ import pickle
 import time
 import datetime
 from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.exception_handlers import HTTPException
+
+
+class SPAStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope):
+        try:
+            return await super().get_response(path, scope)
+        except HTTPException as ex:
+            if ex.status_code == 404:
+                return await super().get_response("index.html", scope)
+            else:
+                raise ex
 
 
 class ReadCache:
@@ -38,6 +51,7 @@ class Server:
     def __init__(self, databaseAccess: DatabaseAccess):
         self.db = databaseAccess
         self.app = FastAPI()
+
         self.router = APIRouter(prefix="/api")
         self.router.add_api_route(
             "/actress_detail", self.get_all_actress_detail, methods=["GET"]
@@ -66,7 +80,12 @@ class Server:
         self.router.add_api_route("/queue_add", self.add_to_queue, methods=["POST"])
 
         self.router.add_api_route("/diagnostics", self.diagnostics, methods=["GET"])
+
         self.app.include_router(self.router)
+
+        self.app.mount("/", SPAStaticFiles(directory="./server/build"), name="static")
+        self.app.add_route("/", self.serve_webpage)
+        # self.app.add_api_route("/api/diagnostics", self.diagnostics, methods=["GET"])
         self.cache = ReadCache()
 
     def main_loop(self):
@@ -263,6 +282,7 @@ class Server:
         Returns:
             bytes: _description_
         """
+
         if uuid in self.cache.images:
             logging.info("Thumbnail found in cache. ")
             return Response(self.cache.images[uuid], media_type="image/png")
@@ -271,7 +291,7 @@ class Server:
 
         self.cache.images[uuid] = imageBytes
         return Response(
-            imageBytes,
+            self.cache.images[uuid],
             media_type="image/png",
         )
 
@@ -332,3 +352,6 @@ class Server:
         )
         response.headers["Accept-Ranges"] = "bytes"
         return response
+
+    def serve_webpage(self, *_) -> HTMLResponse:
+        return HTMLResponse(content=open("./server/build/index.html").read())
