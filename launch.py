@@ -1,25 +1,25 @@
 import argparse
+import datetime
+import inspect
+import json
 import logging
 import os
+import platform
+import string
+import sys
+import traceback
+from datetime import timedelta
 from pathlib import Path
 
+import psutil
 import uvicorn
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 from downloader.downloader import Downloader
 from indexer.indexer import Indexer
 from server.server import Server
 from util.database.database_access import DatabaseAccess
-import traceback
-import inspect
-import datetime
-import sys
-import platform
-import psutil
-import string
-import json
-from bs4 import BeautifulSoup
-from datetime import timedelta
 
 
 def remove_invalid_characters(input_string):

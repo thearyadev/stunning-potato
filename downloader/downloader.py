@@ -5,6 +5,7 @@ import urllib.request
 from pathlib import Path
 from uuid import UUID
 
+import requests
 from beartype import beartype
 
 from util.database.database_access import DatabaseAccess
@@ -12,7 +13,6 @@ from util.models.film import Film, FilmStateEnum
 from util.models.queue import Queue
 from util.scraper.detail_page import get_download_url, get_iframe_source
 from util.scraper.document import get_document
-import requests
 
 
 @beartype

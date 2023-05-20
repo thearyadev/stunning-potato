@@ -1,6 +1,7 @@
 import logging
 import random
-from datetime import date, timedelta, datetime
+import time
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from beartype import beartype
 from psycopg2 import pool
 from psycopg2.extras import DictCursor, UUID_adapter, register_uuid
 
+from util.models.actress_detail import ActressDetail
 from util.models.film import (
     Film,
     FilmIn,
@@ -19,9 +21,6 @@ from util.models.film import (
 from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
-from util.models.actress_detail import ActressDetail
-import random
-import time
 
 MAX_RETRIES = 10
 RETRY_INTERVAL = 3

@@ -1,30 +1,35 @@
+import datetime
+import inspect
+import logging
+import os
+import pickle
+import platform
+import shutil
+import sys
+import time
+import traceback
+from pathlib import Path
 from uuid import UUID, uuid4
 
+import psutil
 import uvicorn
 from fastapi import APIRouter, FastAPI, Query
-from fastapi.responses import Response, FileResponse, StreamingResponse, HTMLResponse
+from fastapi.exception_handlers import HTTPException
+from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from util.database.database_access import DatabaseAccess
-from util.models.film import FilmNoBytes, FilmNoBytesWithAverage
-from util.models.rating import Rating, RatingIn
 from util.models.actress_detail import ActressDetail
+from util.models.film import (
+    Film,
+    FilmIn,
+    FilmNoBytes,
+    FilmNoBytesWithAverage,
+    FilmStateEnum,
+)
 from util.models.indexed import IndexedNoBytes
 from util.models.queue import QueueIn
-from util.models.film import FilmIn, FilmStateEnum, Film
-import shutil
-import os
-import logging
-import sys
-import pickle
-import time
-import datetime
-from pathlib import Path
-from fastapi.staticfiles import StaticFiles
-from fastapi.exception_handlers import HTTPException
-import inspect
-import traceback
-import platform
-import psutil
+from util.models.rating import Rating, RatingIn
 
 
 def filter_bytes_variables(variables):
