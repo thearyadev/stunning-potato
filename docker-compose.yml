@@ -46,7 +46,7 @@ services:
     networks:
       lewdlocale:
     deploy:
-      replicas: 3
+      replicas: 5
 
 
   postgres:
