@@ -7,9 +7,9 @@
     "actress-details.js": "/static/js/actress-details.36efb82a.chunk.js",
     "main.css": "/static/css/main.f4977b4d.chunk.css",
     "main.js": "/static/js/main.b7c9c085.chunk.js",
-    "runtime-main.js": "/static/js/runtime-main.5f76050c.js",
-    "second.js": "/static/js/second.2b5bc029.chunk.js",
-    "start.js": "/static/js/start.8fbecbfe.chunk.js",
+    "runtime-main.js": "/static/js/runtime-main.122f0fbe.js",
+    "second.js": "/static/js/second.f8b4791c.chunk.js",
+    "start.js": "/static/js/start.609a2d80.chunk.js",
     "views-app.js": "/static/js/views-app.85006844.chunk.js",
     "views-error.js": "/static/js/views-error.6e6456f9.chunk.js",
     "viwes-gogo.js": "/static/js/viwes-gogo.ab93be0a.chunk.js",
@@ -75,7 +75,7 @@
     "static/media/gogo.dark.yellowgranola.scss": "/static/media/white.d375ecba.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.5f76050c.js",
+    "static/js/runtime-main.122f0fbe.js",
     "static/css/14.0bc4d452.chunk.css",
     "static/js/14.9b41d4ec.chunk.js",
     "static/css/main.f4977b4d.chunk.css",
