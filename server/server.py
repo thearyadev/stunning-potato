@@ -449,7 +449,7 @@ class Server:
     def serve_webpage(self, *_) -> HTMLResponse:
         return HTMLResponse(content=open("./server/build/index.html").read())
 
-    def get_active_downloaders(self) -> list[dict[Any, Any]]:
+    def get_active_downloaders(self):
         """Returns list of active downloaders
 
         Returns:
