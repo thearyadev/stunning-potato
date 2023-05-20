@@ -55,7 +55,6 @@ class Downloader:
                 f.write(data)
                 f.flush()
                 progress = int((download_size / total_size) * 100)
-                print(f"{progress}%. [{progress == last_reported_progress}]")
                 if progress != last_reported_progress:
                     self.db.set_film_progress(newProgress=progress, film_uuid=film.uuid)
                     last_reported_progress = progress
