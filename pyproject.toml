@@ -21,6 +21,7 @@ uvicorn = "^0.22.0"
 memory-profiler = "^0.61.0"
 matplotlib = "^3.7.1"
 psycopg2-binary = "^2.9.6"
+docker = "^6.1.2"
 
 
 [build-system]
