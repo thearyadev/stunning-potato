@@ -13,6 +13,7 @@ services:
     volumes:
       - /remote/xxx/films:/lewdlocale/films
       - /remote/xxx/errors:/lewdlocale/errors
+      - /var/run/docker.sock:/var/run/docker.sock # to track other containers
     networks:
       lewdlocale:
     restart: on-failure:3
