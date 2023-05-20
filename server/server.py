@@ -31,6 +31,9 @@ from util.models.indexed import IndexedNoBytes
 from util.models.queue import QueueIn
 from util.models.rating import Rating, RatingIn
 
+from typing import Any
+import docker
+
 
 def filter_bytes_variables(variables):
     filtered_vars = {}
@@ -104,7 +107,9 @@ class Server:
         )
         self.router.add_api_route("/v", self.serve_video, methods=["GET"])
         self.router.add_api_route("/queue_add", self.add_to_queue, methods=["POST"])
-
+        self.router.add_api_route(
+            "/downloaders", self.get_active_downloaders, methods=["GET"]
+        )
         self.router.add_api_route("/diagnostics", self.diagnostics, methods=["GET"])
 
         self.app.include_router(self.router)
@@ -443,3 +448,35 @@ class Server:
 
     def serve_webpage(self, *_) -> HTMLResponse:
         return HTMLResponse(content=open("./server/build/index.html").read())
+
+    def get_active_downloaders(self) -> list[dict[Any, Any]]:
+        """Returns list of active downloaders
+
+        Returns:
+            list[dict[Any, Any]]: list of active downloaders
+        """
+        NETWORK_NAME = "stunning-potato_lewdlocale"
+        try:
+            results: list[dict[Any, Any]] = list()
+            client = docker.from_env()
+            containers = client.containers.list()
+            for container in containers:
+                c = container
+                netAttrs = (
+                    c.attrs.get("NetworkSettings").get("Networks").get(NETWORK_NAME)
+                )
+                if netAttrs is not None:
+                    for alias in netAttrs.get("Aliases"):
+                        if "downloader" in alias:
+                            results.append(
+                                {
+                                    "alisases": netAttrs.get("Aliases"),
+                                    "ip_address": netAttrs.get("IPAddress"),
+                                    "mac_address": netAttrs.get("MacAddress"),
+                                }
+                            )
+                            break
+
+        except Exception as e:
+            logging.error(e)
+            return []
