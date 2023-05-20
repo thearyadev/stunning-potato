@@ -44,8 +44,8 @@ services:
       - /remote/xxx/errors:/lewdlocale/errors
     networks:
       lewdlocale:
-    scale: 3
-    restart: on-failure:3
+    deploy:
+      replicas: 3
 
 
   postgres:
