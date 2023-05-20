@@ -21,6 +21,27 @@ import datetime
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 from fastapi.exception_handlers import HTTPException
+import inspect
+import traceback
+import platform
+import psutil
+
+
+def filter_bytes_variables(variables):
+    filtered_vars = {}
+    for name, value in variables.items():
+        if isinstance(value, bytes):
+            continue
+        if inspect.isclass(value):
+            class_attrs = {}
+            for attr_name, attr_value in value.__dict__.items():
+                if isinstance(attr_value, bytes):
+                    continue
+                class_attrs[attr_name] = attr_value
+            filtered_vars[name] = class_attrs
+        else:
+            filtered_vars[name] = value
+    return filtered_vars
 
 
 class SPAStaticFiles(StaticFiles):
@@ -90,6 +111,62 @@ class Server:
 
     def main_loop(self):
         uvicorn.run(self.app, port=8000, host="0.0.0.0")
+        line_number = traceback.extract_tb(tb)[-1][1]
+        filename = traceback.extract_tb(tb)[-1][0]
+        full_traceback = traceback.format_exc()
+        local_vars = inspect.trace()[-1][0].f_locals
+        global_vars = inspect.trace()[-1][0].f_globals
+        class_attrs = filter_bytes_variables(local_vars)
+
+        local_vars = {
+            str(k): (str(v) if not isinstance(v, bytes) else "bytes_omitted")
+            for k, v in local_vars.items()
+        }
+        global_vars = {
+            str(k): (str(v) if not isinstance(v, bytes) else "bytes_omitted")
+            for k, v in global_vars.items()
+        }
+        class_attrs = {
+            str(k): (str(v) if not isinstance(v, bytes) else "bytes_omitted")
+            for k, v in class_attrs.items()
+        }
+
+        error_type = type(e).__name__
+        function_name = inspect.getframeinfo(sys._getframe(0)).function
+        module_name = __name__
+        timestamp = datetime.datetime.now()
+        args = sys.argv
+        current_directory = os.getcwd()
+        platform_info = platform.platform()
+        memory_usage = psutil.Process(os.getpid()).memory_info().rss
+
+        error_report = {
+            "line_number": line_number,
+            "function_name": function_name,
+            "module_name": module_name,
+            "timestamp": str(timestamp.timestamp()),
+            "error_type": error_type,
+            "full_traceback": full_traceback,
+            "local_vars": local_vars,
+            "global_vars": global_vars,
+            "class_and_func_attrs": class_attrs,
+            "args": args,
+            "current_directory": current_directory,
+            "platform_info": platform_info,
+            "memory_usage": memory_usage,
+        }
+
+        with open(
+            Path(os.getenv("ERROR_REPORT_PATH")).joinpath(
+                f"{error_type}-{str(timestamp.timestamp())}.json"
+            ),
+            "w+",
+        ) as f:
+            json.dump(error_report, f, indent=4, sort_keys=True)
+            logging.critical(f"Error report written to {f.name}")
+            raise e
+
+        return Response("Internal Server Error2", status_code=500)
 
     def get_films_no_bytes_with_average(self) -> list[FilmNoBytesWithAverage]:
         """Queries all records in the films table. This is cached. If the cache is outdated, it will be refreshed.
@@ -97,6 +174,7 @@ class Server:
         Returns:
             list[FilmNoBytesWithAverage]: list of FilmNoBytesWithAverage objects
         """
+        1 / 0
         if self.cache.filmsStamp is None:  # first run, no stamp. Data must be outdated.
             logging.info("no stamp. Data must be outdated. :: films")
             self.cache.films = (

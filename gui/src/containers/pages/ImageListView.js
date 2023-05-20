@@ -60,9 +60,8 @@ const ImageListView = ({ film, isSelect, selectFunc }) => {
                       {film.date_added}
                     </CardText>
                     <div className="d-flex align-items-center">
-                      <span className="font-weight-bold mr-2">{film.average}</span>
-                      <span className='simple-icon-star' />
-
+                      <span className="font-weight-bold mr-2">{film.average !== 0 ? film.average : '-'}</span>
+                      {film.average !== 0 ? <span className='simple-icon-star' /> : null}
                     </div>
                   </div>
                 </Colxx>
