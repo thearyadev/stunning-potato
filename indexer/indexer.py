@@ -65,7 +65,7 @@ class Indexer:
         self,
         databaseAccess: DatabaseAccess,
         *,
-        sleep_time: int = 200,
+        sleep_time: int = 1800,
         iterator_sleep_time: int = 5,
     ):
         self.db = databaseAccess
@@ -96,5 +96,5 @@ class Indexer:
                     self.db.insert_indexed(index(film_id))
                 else:
                     logging.info(f"Film {film_id} already indexed. Skipping.")
-            logging.info("Sleeping for 15 seconds...")
+            logging.info("Sleeping seconds...")
             time.sleep(self.sleep_time)
