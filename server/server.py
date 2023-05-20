@@ -467,16 +467,14 @@ class Server:
                 )
                 if netAttrs is not None:
                     for alias in netAttrs.get("Aliases"):
-                        if "downloader" in alias:
-                            results.append(
-                                {
-                                    "alisases": netAttrs.get("Aliases"),
-                                    "ip_address": netAttrs.get("IPAddress"),
-                                    "mac_address": netAttrs.get("MacAddress"),
-                                }
-                            )
-                            break
-
+                        results.append(
+                            {
+                                "aliases": netAttrs.get("Aliases"),
+                                "ip_address": netAttrs.get("IPAddress"),
+                                "mac_address": netAttrs.get("MacAddress"),
+                            }
+                        )
+            return results
         except Exception as e:
             logging.error(e)
             return []

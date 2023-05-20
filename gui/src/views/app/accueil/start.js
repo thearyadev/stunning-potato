@@ -8,6 +8,9 @@ import { CircularProgressbar } from 'react-circular-progressbar';
 import { useEffect } from 'react';
 import data from 'data/iconCards';
 import IconCard from 'components/cards/IconCard';
+import GradientWithRadialProgressCard from 'components/cards/GradientWithRadialProgressCard';
+
+
 
 const RadialProgressCard = ({
   title = 'title',
@@ -39,12 +42,18 @@ const RadialProgressCard = ({
 
 const Start = ({ match }) => {
   const [diagnosticData, setDiagnosticData] = React.useState([]);
+  const [downloadersStatus, setDownloadersStatus] = React.useState([]);
+
   const [loading, setLoading] = React.useState(true);
   useEffect(() => {
     fetch("/api/diagnostics")
       .then(res => res.json())
       .then(d => { setDiagnosticData(d) })
-      .then(() => setLoading(false))
+      .then(() => fetch("/api/downloaders")
+        .then(res => res.json())
+        .then(d => { setDownloadersStatus(d) })
+        .then(() => setLoading(false))
+        )
   }, [])
   return (
     <>
@@ -55,14 +64,7 @@ const Start = ({ match }) => {
         </Colxx>
       </Row>
       <Row>
-        <Colxx xxs="12" className="mb-4">
-          <RadialProgressCard
-            title='Storage Used'
-            percent={diagnosticData?.disk?.used / diagnosticData?.disk?.total * 100}
-          />
-
-        </Colxx>
-        <Colxx xxs="12" className="mb-4">
+        <Colxx xxs="12" className="">
           <Row className="icon-cards-row mb-2">
             <Colxx xxs="6" sm="4" md="3" lg="2">
               <IconCard {...{ title: 'Cache Size', icon: "iconsminds-arrow-refresh", value: `${Math.round(diagnosticData?.cache_size/1000/1000)} MB` }} className="mb-4 w-100" />
@@ -84,6 +86,25 @@ const Start = ({ match }) => {
             </Colxx>
           </Row>
         </Colxx>
+      </Row>
+      <Row>
+        {downloadersStatus.map((d, i) => {
+          return (
+            <Colxx lg="4" md="6" className="mb-4" key={i}>
+              <GradientWithRadialProgressCard
+                
+                icon="simple-icon-cloud-download"
+                title={`${d.aliases[0]}`}
+                detail={`Container ID: ${d.aliases[d.aliases.length - 1]}`}
+                percent={100}
+                progressText="Online"
+                net={`Network: ${d.ip_address} ${d.mac_address}`}
+              />
+        </Colxx>
+          )
+        })}
+
+    
       </Row>
     </>
   )
