@@ -15,7 +15,8 @@ export function configureStore(initialState) {
   const store = createStore(
     reducers,
     initialState,
-    compose(applyMiddleware(...middlewares), composeWithDevTools()),
+    // compose(applyMiddleware(...middlewares), composeWithDevTools()),
+    compose(applyMiddleware(...middlewares)),
     );
 
   sagaMiddleware.run(sagas);
