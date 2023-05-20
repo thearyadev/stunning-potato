@@ -179,7 +179,6 @@ class Server:
         Returns:
             list[FilmNoBytesWithAverage]: list of FilmNoBytesWithAverage objects
         """
-        1 / 0
         if self.cache.filmsStamp is None:  # first run, no stamp. Data must be outdated.
             logging.info("no stamp. Data must be outdated. :: films")
             self.cache.films = (
