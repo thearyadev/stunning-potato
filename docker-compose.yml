@@ -41,6 +41,7 @@ services:
     depends_on:
       - postgres
     volumes:
+      - /remote/xxx/films:/lewdlocale/films
       - /remote/xxx/errors:/lewdlocale/errors
     networks:
       lewdlocale:
