@@ -105,10 +105,11 @@ def get_iframe_source(document: BeautifulSoup) -> str:
     """
     iframes = document.find_all("iframe")
     for frame in iframes:
-        if frame["src"] not in IFRAME_BLACKLIST:
-            url: str = parse_url(frame["src"])
-            logging.info(f"Found iframe source {url}")
-            return url
+        if is_blacklisted(frame["src"]):
+            continue
+        return parse_url(frame["src"])
+            
+
     raise ValueError("No iframe found")
 
 
@@ -167,3 +168,9 @@ def generate_thumbnail(poster: bytes) -> bytes:
         image.save(thumbnail_buffer, "PNG")
         logging.info("Thumbnail generated")
         return thumbnail_buffer.getvalue()
+
+def is_blacklisted(url: str) -> bool:
+    for blacklistItem in IFRAME_BLACKLIST:
+        if blacklistItem in url:
+            return True
+    return False

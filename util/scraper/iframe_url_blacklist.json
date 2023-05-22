@@ -1,5 +1,6 @@
 {
     "blacklist": [
-        "a.realsrv.com"
+        "a.realsrv.com",
+        "a.adtng.com"
     ]
 }
