@@ -33,6 +33,7 @@ from util.models.rating import Rating, RatingIn
 
 from typing import Any
 import docker
+from indexer.indexer import index, extract_film_id
 
 
 def filter_bytes_variables(variables):
@@ -109,6 +110,10 @@ class Server:
         self.router.add_api_route("/queue_add", self.add_to_queue, methods=["POST"])
         self.router.add_api_route(
             "/downloaders", self.get_active_downloaders, methods=["GET"]
+        )
+
+        self.router.add_api_route(
+            "/quwu", self.manual_queue_insertion, methods=["POST"]
         )
         self.router.add_api_route("/diagnostics", self.diagnostics, methods=["GET"])
 
@@ -422,3 +427,44 @@ class Server:
         except Exception as e:
             logging.error(e)
             return []
+
+    def manual_queue_insertion(self, urls: list[str]) -> Response:
+        """Manually insert items into queue
+
+        Args:
+            urls (list[str]): list of urls to insert into queue
+
+        Returns:
+            Response: status
+        """
+        for url in urls:
+            film_id = extract_film_id(url)
+            indexed_queue_item = index(film_id)
+            # add rating record
+            rating: Rating = self.db.insert_rating(
+                RatingIn(
+                    story=0, positions=0, pussy=0, shots=0, boobs=0, face=0, rearview=0
+                )
+            )
+            # add film record
+            film: Film = self.db.insert_film(
+                FilmIn(
+                    title=indexed_queue_item.title,
+                    duration=indexed_queue_item.duration,
+                    date_added=datetime.datetime.now(),  # gen cur date
+                    filename=f"{uuid4().hex}.mp4",  # gen filename
+                    watched=False,
+                    state=FilmStateEnum.IN_QUEUE,
+                    actresses=indexed_queue_item.actresses,
+                    thumbnail=indexed_queue_item.thumbnail,
+                    poster=indexed_queue_item.poster,
+                    download_progress=0,  # default value
+                    rating=rating.uuid,  # get rating uuid
+                )
+            )
+
+            self.db.insert_queue(
+                # url to get from             # film record uuid
+                QueueIn(url=indexed_queue_item.url, film_uuid=film.uuid)
+            )
+        return Response(status_code=200)
