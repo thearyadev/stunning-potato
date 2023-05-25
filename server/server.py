@@ -9,8 +9,10 @@ import sys
 import time
 import traceback
 from pathlib import Path
+from typing import Any
 from uuid import UUID, uuid4
-
+import pycco
+import docker
 import psutil
 import uvicorn
 from fastapi import APIRouter, FastAPI, Query
@@ -18,6 +20,7 @@ from fastapi.exception_handlers import HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
+from indexer.indexer import extract_film_id, index
 from util.database.database_access import DatabaseAccess
 from util.models.actress_detail import ActressDetail
 from util.models.film import (
@@ -30,10 +33,6 @@ from util.models.film import (
 from util.models.indexed import IndexedNoBytes
 from util.models.queue import QueueIn
 from util.models.rating import Rating, RatingIn
-
-from typing import Any
-import docker
-from indexer.indexer import index, extract_film_id
 
 
 def filter_bytes_variables(variables):
