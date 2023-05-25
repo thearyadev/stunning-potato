@@ -115,7 +115,7 @@ class Server:
 
         self.app.include_router(self.router)
 
-        self.app.mount("/", SPAStaticFiles(directory="./server/build"), name="static")
+        # self.app.mount("/", SPAStaticFiles(directory="./server/build"), name="static")
         self.app.add_route("/", self.serve_webpage)
         # self.app.add_api_route("/api/diagnostics", self.diagnostics, methods=["GET"])
         self.cache = ReadCache()
@@ -482,32 +482,18 @@ class Server:
         - A list of dictionaries, one for each container in the 'stunning-potato'
           stack.
         """
-        try:
-            client = docker.DockerClient()
-        except:
-            # access remote docker daemon if local is not availabl. This is for development only. In production, the docker daemon should be running locally.
-            client = docker.DockerClient(base_url="http://192.168.50.190:2375")
-        containers = client.containers.list()
+        client = docker.DockerClient()
+        containers = client.containers.list(all=True)
         results = list()
         for container in containers:
             stack_name = container.labels.get("com.docker.compose.project")
-
             if stack_name != "stunning-potato":
                 continue
             status = container.status
-            container_id = container.id
-            container_ip = container.attrs["NetworkSettings"]["Networks"][
-                "stunning-potato_lewdlocale"
-            ]["IPAddress"]
-            container_mac = container.attrs["NetworkSettings"]["Networks"][
-                "stunning-potato_lewdlocale"
-            ]["MacAddress"]
+            
             results.append(
                 {
                     "status": status,
-                    "container_id": container_id,
-                    "container_ip": container_ip,
-                    "container_mac": container_mac,
                     "container_name": container.name.replace("stunning-potato-", "")
                     .replace("-", " ")
                     .title(),
