@@ -115,7 +115,13 @@ class Server:
 
         self.app.include_router(self.router)
 
-        # self.app.mount("/", SPAStaticFiles(directory="./server/build"), name="static")
+        try:
+            self.app.mount("/", SPAStaticFiles(directory="./server/build"), name="static")
+
+        except Exception as e:
+            logging.critical("Failed to mount build directory files")
+            logging.error(e)
+            
         self.app.add_route("/", self.serve_webpage)
         # self.app.add_api_route("/api/diagnostics", self.diagnostics, methods=["GET"])
         self.cache = ReadCache()
