@@ -11,7 +11,6 @@ import traceback
 from pathlib import Path
 from typing import Any
 from uuid import UUID, uuid4
-import pycco
 import docker
 import psutil
 import uvicorn
