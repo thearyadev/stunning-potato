@@ -45,6 +45,17 @@ class Downloader:
             time.sleep(5)
 
     def download(self, url: str, film: Film) -> None:
+        """
+        Downloads a file from the given URL and saves it to disk, while reporting progress to the database.
+
+        Args:
+            url (str): The URL of the file to download.
+            film (Film): The Film object representing the file to download.
+
+        Returns:
+            None
+        """
+
         response = requests.get(url, stream=True)
         total_size = int(response.headers.get("content-length", 0))
         download_size = 0
