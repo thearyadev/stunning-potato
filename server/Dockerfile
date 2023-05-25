@@ -10,10 +10,7 @@ WORKDIR /lewdlocale
 
 COPY . .
 
-WORKDIR /lewdlocale/gui
-RUN ls -l /lewdlocale
-
-RUN yarn install && \
+RUN cd gui && yarn install && \
     yarn build
 
 # Install Python dependencies
