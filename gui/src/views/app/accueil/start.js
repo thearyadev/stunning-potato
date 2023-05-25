@@ -11,7 +11,6 @@ import IconCard from 'components/cards/IconCard';
 import GradientWithRadialProgressCard from 'components/cards/GradientWithRadialProgressCard';
 
 
-
 const RadialProgressCard = ({
   title = 'title',
   percent = 50,
@@ -42,19 +41,22 @@ const RadialProgressCard = ({
 
 const Start = ({ match }) => {
   const [diagnosticData, setDiagnosticData] = React.useState([]);
-  const [downloadersStatus, setDownloadersStatus] = React.useState([]);
+  const [containerData, setContainerData] = React.useState([]);
 
   const [loading, setLoading] = React.useState(true);
   useEffect(() => {
     fetch("/api/diagnostics")
       .then(res => res.json())
       .then(d => { setDiagnosticData(d) })
-      .then(() => fetch("/api/downloaders")
+      .then(() => fetch("/api/containers")
         .then(res => res.json())
-        .then(d => { setDownloadersStatus(d) })
+        .then(d => { setContainerData(d) })
         .then(() => setLoading(false))
         )
   }, [])
+
+  console.log(containerData)
+
   return (
     <>
       <Row>
@@ -88,17 +90,16 @@ const Start = ({ match }) => {
         </Colxx>
       </Row>
       <Row>
-        {downloadersStatus.map((d, i) => {
+        {containerData.map((d, i) => {
           return (
             <Colxx lg="4" md="6" className="mb-4" key={i}>
               <GradientWithRadialProgressCard
                 
-                icon="simple-icon-cloud-download"
-                title={`${d.aliases[0]}`}
-                detail={`Container ID: ${d.aliases[d.aliases.length - 1]}`}
-                percent={100}
-                progressText="Online"
-                net={`Network: ${d.ip_address} ${d.mac_address}`}
+                icon="iconsminds-box-close"
+                title={`${d.container_name}`}
+                detail=''
+                percent={d.status === "running" ? 100 : 0}
+                progressText={d.status === "running" ? "Online" : "Offline"}
               />
         </Colxx>
           )

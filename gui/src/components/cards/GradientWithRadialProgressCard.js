@@ -8,7 +8,7 @@ const GradientWithRadialProgressCard = ({
   detail = 'detail',
   percent = 80,
   progressText = '8/10',
-  net
+  
 }) => {
   return (
     <Card className="progress-banner">
@@ -20,12 +20,11 @@ const GradientWithRadialProgressCard = ({
           <div>
             <p className="lead text-white">{title}</p>
             <p className="text-small text-white">{detail}</p>
-            <p className="text-small text-white">{net}</p>
           </div>
         </div>
         <div className="progress-bar-circle progress-bar-banner position-relative">
           <CircularProgressbar
-            strokeWidth={4}
+            strokeWidth={8}
             value={percent}
             text={progressText}
           />
