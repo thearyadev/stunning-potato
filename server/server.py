@@ -106,9 +106,7 @@ class Server:
         )
         self.router.add_api_route("/v", self.serve_video, methods=["GET"])
         self.router.add_api_route("/queue_add", self.add_to_queue, methods=["POST"])
-        self.router.add_api_route(
-            "/downloaders", self.get_active_downloaders, methods=["GET"]
-        )
+        self.router.add_api_route("/containers", self.container_data, methods=["GET"])
 
         self.router.add_api_route(
             "/quwu", self.manual_queue_insertion, methods=["POST"]
@@ -396,35 +394,35 @@ class Server:
     def serve_webpage(self, *_) -> HTMLResponse:
         return HTMLResponse(content=open("./server/build/index.html").read())
 
-    def get_active_downloaders(self):
-        """Returns list of active downloaders
+    # def get_active_downloaders(self):
+    #     """Returns list of active downloaders
 
-        Returns:
-            list[dict[Any, Any]]: list of active downloaders
-        """
-        NETWORK_NAME = "stunning-potato_lewdlocale"
-        try:
-            results: list[dict[Any, Any]] = list()
-            client = docker.from_env()
-            containers = client.containers.list()
-            for container in containers:
-                c = container
-                netAttrs = (
-                    c.attrs.get("NetworkSettings").get("Networks").get(NETWORK_NAME)
-                )
-                if netAttrs is not None:
-                    results.append(
-                        {
-                            "aliases": netAttrs.get("Aliases"),
-                            "ip_address": netAttrs.get("IPAddress"),
-                            "mac_address": netAttrs.get("MacAddress"),
-                        }
-                    )
+    #     Returns:
+    #         list[dict[Any, Any]]: list of active downloaders
+    #     """
+    #     NETWORK_NAME = "stunning-potato_lewdlocale"
+    #     try:
+    #         results: list[dict[Any, Any]] = list()
+    #         client = docker.from_env()
+    #         containers = client.containers.list()
+    #         for container in containers:
+    #             c = container
+    #             netAttrs = (
+    #                 c.attrs.get("NetworkSettings").get("Networks").get(NETWORK_NAME)
+    #             )
+    #             if netAttrs is not None:
+    #                 results.append(
+    #                     {
+    #                         "aliases": netAttrs.get("Aliases"),
+    #                         "ip_address": netAttrs.get("IPAddress"),
+    #                         "mac_address": netAttrs.get("MacAddress"),
+    #                     }
+    #                 )
 
-            return results
-        except Exception as e:
-            logging.error(e)
-            return []
+    #         return results
+    #     except Exception as e:
+    #         logging.error(e)
+    #         return []
 
     def manual_queue_insertion(self, urls: list[str]) -> Response:
         """Manually insert items into queue
@@ -466,3 +464,54 @@ class Server:
                 QueueIn(url=indexed_queue_item.url, film_uuid=film.uuid)
             )
         return Response(status_code=200)
+
+    def container_data(self) -> list[dict]:
+        """
+        Returns a list of dictionaries containing information about the containers
+        running in the 'stunning-potato' stack.
+
+        Each dictionary contains the following keys:
+        - 'status': the status of the container
+        - 'container_id': the ID of the container
+        - 'container_ip': the IP address of the container
+        - 'container_mac': the MAC address of the container
+        - 'container_name': the name of the container, with 'stunning-potato-' and
+          hyphens removed and words capitalized.
+
+        Returns:
+        - A list of dictionaries, one for each container in the 'stunning-potato'
+          stack.
+        """
+        try:
+            client = docker.DockerClient()
+        except:
+            # access remote docker daemon if local is not availabl. This is for development only. In production, the docker daemon should be running locally.
+            client = docker.DockerClient(base_url="http://192.168.50.190:2375")
+        containers = client.containers.list()
+        results = list()
+        for container in containers:
+            stack_name = container.labels.get("com.docker.compose.project")
+
+            if stack_name != "stunning-potato":
+                continue
+            status = container.status
+            container_id = container.id
+            container_ip = container.attrs["NetworkSettings"]["Networks"][
+                "stunning-potato_lewdlocale"
+            ]["IPAddress"]
+            container_mac = container.attrs["NetworkSettings"]["Networks"][
+                "stunning-potato_lewdlocale"
+            ]["MacAddress"]
+            results.append(
+                {
+                    "status": status,
+                    "container_id": container_id,
+                    "container_ip": container_ip,
+                    "container_mac": container_mac,
+                    "container_name": container.name.replace("stunning-potato-", "")
+                    .replace("-", " ")
+                    .title(),
+                }
+            )
+
+        return results
