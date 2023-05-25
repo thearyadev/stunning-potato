@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: ./server/Dockerfile
+      dockerfile: ./server/.dockerignore
+
     env_file:
       - docker.env
     depends_on:
@@ -22,6 +24,7 @@ services:
     build:
       context: .
       dockerfile: ./indexer/Dockerfile
+      dockerfile: ./server/.dockerignore
     env_file:
       - docker.env
     depends_on:
@@ -36,6 +39,7 @@ services:
     build:
       context: .
       dockerfile: ./downloader/Dockerfile
+      dockerfile: ./server/.dockerignore
     env_file:
       - docker.env
     depends_on:
