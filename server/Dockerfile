@@ -11,7 +11,7 @@ WORKDIR /lewdlocale
 COPY . .
 
 WORKDIR /lewdlocale/gui
-RUN ls -l
+RUN ls -l; exit 1;
 
 RUN yarn install && \
     yarn build
