@@ -10,8 +10,7 @@ WORKDIR /lewdlocale
 
 COPY . .
 
-WORKDIR /lewdlocale/gui
-RUN ls -l; exit 1;
+RUN cd gui
 
 RUN yarn install && \
     yarn build
@@ -26,5 +25,6 @@ RUN pip install poetry==1.3.2 && \
 RUN mkdir -p /lewdlocale/server/build && \
     mv /lewdlocale/gui/build/* /lewdlocale/server/build/
 
+WORKDIR /lewdlocale
 # Set the entrypoint
 ENTRYPOINT ["poetry", "run", "python", "launch.py", "--app", "server", "--flush", "False", "--log-level", "INFO"]
