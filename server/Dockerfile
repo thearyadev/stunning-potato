@@ -9,9 +9,10 @@ RUN apt-get update && apt-get install -y curl && \
 WORKDIR /lewdlocale
 
 COPY . .
-RUN ls
 
-RUN cd gui && yarn install && \
+WORKDIR /lewdlocale/gui
+
+RUN yarn install && \
     yarn build
 
 # Install Python dependencies
