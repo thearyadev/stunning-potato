@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y curl && \
 WORKDIR /lewdlocale
 
 COPY . .
-RUN ls /lewdlocale/gui
+RUN ls ./gui
 
 RUN cd gui && yarn install && \
     yarn build
