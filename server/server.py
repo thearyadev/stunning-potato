@@ -315,7 +315,7 @@ class Server:
         Returns:
             list[IndexedNoBytes]: list of indexed items
         """
-        return self.db.get_by_count_indexed_no_bytes(100)
+        return self.db.get_by_count_indexed_no_bytes(300)
 
     def get_indexed_thumbnail(self, uuid: UUID = Query(...)) -> bytes:
         """Uses cached thumbnails if available.
