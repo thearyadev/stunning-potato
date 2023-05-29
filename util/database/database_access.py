@@ -4,6 +4,7 @@ import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
+import os
 
 import psycopg2
 from beartype import beartype
@@ -591,7 +592,32 @@ class DatabaseAccess:
             connection.commit()
         self.connection_pool.putconn(connection)
 
-    def populate_demo_data(self):
+    def populate_demo_data(self, count: int = 100):
+        def load_thumbs(thumbs_dir) -> list[bytes]:
+            try:
+                thumbs: list[bytes] = []
+                for thumb in os.listdir(thumbs_dir):
+                    with open(os.path.join(thumbs_dir, thumb), "rb") as f:
+                        thumbs.append(f.read())
+                return thumbs
+            except:
+                return [
+                    b"this is a thumbnail",
+                ]
+
+        def load_posters(posters_dir) -> list[bytes]:
+            try:
+                posters: list[bytes] = []
+                for poster in os.listdir(posters_dir):
+                    with open(os.path.join(posters_dir, poster), "rb") as f:
+                        posters.append(f.read())
+                return posters
+            except:
+                return [
+                    b"this is a poster",
+                ]
+
+
         list_of_porn_actresses = [
             "Scarlet Skies",
             "Aria Banks",
@@ -606,7 +632,7 @@ class DatabaseAccess:
 
         ratings: list[Rating] = []
 
-        for _ in range(500):
+        for _ in range(count):
             ratings.append(
                 self.insert_rating(
                     RatingIn(
@@ -621,14 +647,13 @@ class DatabaseAccess:
                 )
             )
 
-        films: list[Film] = []
-        import os
+        thumbs = load_thumbs("temp/thumbs")
+        posters = load_posters("temp/posters")
 
-        for i in range(len(ratings)):
-            with open(
-                f"temp/thumbs/{random.choice(os.listdir('temp/thumbs'))}", "rb"
-            ) as thumbnail, open("./temp/poster.jpg", "rb") as poster:
-                films.append(
+        films: list[Film] = []
+
+        for i in range(count):
+            films.append(
                     self.insert_film(
                         FilmIn(
                             title=f"sexy time {i + 1}",
@@ -641,8 +666,8 @@ class DatabaseAccess:
                             ),
                             watched=random.choice([False, True]),
                             state=random.choice(list(FilmStateEnum)),
-                            thumbnail=thumbnail.read(),
-                            poster=poster.read(),
+                            thumbnail=random.choice(thumbs),
+                            poster=random.choice(posters),
                             download_progress=random.randint(0, 100),
                             filename=f"film_number_{i * random.randint(1, 20)}.mp4",
                             actresses=random.sample(
@@ -653,19 +678,19 @@ class DatabaseAccess:
                     )
                 )
 
-        for i in range(1, 500):
-            with open(
-                f"temp/thumbs/{random.choice(os.listdir('temp/thumbs'))}", "rb"
-            ) as thumbnail, open("./temp/poster.jpg", "rb") as poster:
-                self.insert_indexed(
+
+
+
+        for i in range(1, count):
+            self.insert_indexed(
                     IndexedIn(
                         title=f"Downloadable Film #{i}",
                         actresses=random.sample(
                             ["Scarlet Skies", "Aria Banks", "Lily Larimar"],
                             random.randint(1, 3),
                         ),
-                        thumbnail=thumbnail.read(),
-                        poster=poster.read(),
+                        thumbnail=random.choice(thumbs),
+                        poster=random.choice(posters),
                         url=f"https://hqporner.com/hdporn/{i}.html",
                         film_id=i,
                         duration=timedelta(seconds=random.randint(500, 5000)),
