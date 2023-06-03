@@ -14,7 +14,7 @@ from uuid import UUID, uuid4
 import docker
 import psutil
 import uvicorn
-from fastapi import APIRouter, FastAPI, Query
+from fastapi import APIRouter, FastAPI, Query, Form
 from fastapi.exception_handlers import HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -32,7 +32,8 @@ from util.models.film import (
 from util.models.indexed import IndexedNoBytes
 from util.models.queue import QueueIn
 from util.models.rating import Rating, RatingIn
-
+from fastapi import FastAPI, File, UploadFile
+from util.scraper.detail_page import generate_thumbnail, toTimeDelta
 
 def filter_bytes_variables(variables):
     filtered_vars = {}
@@ -108,6 +109,7 @@ class Server:
         self.router.add_api_route("/queue_add", self.add_to_queue, methods=["POST"])
         self.router.add_api_route("/containers", self.container_data, methods=["GET"])
 
+        self.router.add_api_route("/upload", self.upload_file, methods=["POST"])
         self.router.add_api_route(
             "/quwu", self.manual_queue_insertion, methods=["POST"]
         )
@@ -116,12 +118,14 @@ class Server:
         self.app.include_router(self.router)
 
         try:
-            self.app.mount("/", SPAStaticFiles(directory="./server/build"), name="static")
+            self.app.mount(
+                "/", SPAStaticFiles(directory="./server/build"), name="static"
+            )
 
         except Exception as e:
             logging.critical("Failed to mount build directory files")
             logging.error(e)
-            
+
         self.app.add_route("/", self.serve_webpage)
         # self.app.add_api_route("/api/diagnostics", self.diagnostics, methods=["GET"])
         self.cache = ReadCache()
@@ -496,7 +500,7 @@ class Server:
             if stack_name != "stunning-potato":
                 continue
             status = container.status
-            
+
             results.append(
                 {
                     "status": status,
@@ -507,3 +511,49 @@ class Server:
             )
 
         return results
+
+    async def upload_file(
+        self,
+        title: str = Form(...),
+        duration: str = Form(...),
+        actresses: str = Form(...),
+        film_file: UploadFile = File(...),
+        film_poster: UploadFile = File(...),
+    ):
+        # process all the data. This will fail if the data is malformed
+        actresses: list[str] = actresses.split(",")
+        poster: bytes = await film_poster.read()
+        filename: str = f"{uuid4().hex}.mp4"
+        thumbnail: bytes = generate_thumbnail(poster)
+        film_bytes: bytes = await film_file.read()
+        duration: datetime.timedelta = toTimeDelta(duration)
+
+        rating: Rating = self.db.insert_rating(
+            RatingIn(
+                story=0, positions=0, pussy=0, shots=0, boobs=0, face=0, rearview=0
+            )
+        )
+        
+        
+        film: Film = self.db.insert_film(
+            FilmIn(
+                title=title,
+                duration=duration,
+                date_added=datetime.date.today(),
+                filename=filename,
+                watched=False,
+                state=FilmStateEnum.COMPLETE,
+                actresses=actresses,
+                thumbnail=thumbnail,
+                poster=poster,
+                rating=rating.uuid,
+                download_progress=100
+
+            )
+        )
+        with open(Path(os.getenv("DOWNLOAD_PATH")).joinpath(filename), "wb") as f:
+            f.write(film_bytes)
+
+        logging.info(f"Inserted film {film.uuid} into database using manual upload")
+        
+        return {"message": "Files uploaded successfully"}
