@@ -852,8 +852,8 @@ class DatabaseAccess:
         connection = self.connection_pool.getconn()
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT pg_size_pretty(pg_database_size('lewdlocale'));",
-                (self.db_name,),
+                "SELECT pg_size_pretty(pg_database_size(%s));",
+                (self.db_name, ),
             )
             size: int = int("".join([i for i in cursor.fetchone()[0] if i.isdigit()]))
         self.connection_pool.putconn(connection)
