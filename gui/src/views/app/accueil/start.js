@@ -55,7 +55,6 @@ const Start = ({ match }) => {
         )
   }, [])
 
-  console.log(containerData)
 
   return (
     <>
