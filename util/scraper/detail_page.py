@@ -16,6 +16,28 @@ IFRAME_BLACKLIST: list[str] = json.loads(
 ).get("blacklist")
 
 
+
+def toTimeDelta(time_text: str) -> timedelta:
+    """Convert string to timedelta
+
+    Args:
+        time (str): time to convert
+
+    Returns:
+        timedelta: converted time
+    """
+    components: list[str] = time_text.split()
+    delta: timedelta = timedelta()
+    for component in components:
+        match component[-1]:
+            case "h":
+                delta += timedelta(hours=int(component[:-1]))
+            case "m":
+                delta += timedelta(minutes=int(component[:-1]))
+            case "s":
+                delta += timedelta(seconds=int(component[:-1]))
+    return delta
+
 @beartype
 def parse_url(url: str) -> str:
     """Parse url and return url with scheme if missing
@@ -73,21 +95,8 @@ def get_film_duration(document: BeautifulSoup) -> timedelta:
     Returns:
         timedelta: film duration
     """
-    abc = str(document)
+    return toTimeDelta(document.find("li", class_="fa-clock-o").text)
 
-    time_text: str = document.find("li", class_="fa-clock-o").text
-    components: list[str] = time_text.split()
-    delta: timedelta = timedelta()
-    for component in components:
-        match component[-1]:
-            case "h":
-                delta += timedelta(hours=int(component[:-1]))
-            case "m":
-                delta += timedelta(minutes=int(component[:-1]))
-            case "s":
-                delta += timedelta(seconds=int(component[:-1]))
-    logging.info(f"Parsed Film Duration {time_text} to {delta}")
-    return delta
 
 
 @beartype
