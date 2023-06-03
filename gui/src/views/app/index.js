@@ -21,6 +21,10 @@ const Accueil = React.lazy(() =>
   import(/* webpackChunkName: "viwes-second-menu" */ './accueil')
 );
 
+const Upload = React.lazy(() =>
+  import(/* webpackChunkName: "viwes-second-menu" */ './upload')
+);
+
 const App = ({ match }) => {
   const films = useSelector((state) => state.films.films);
   const [showRoutes, setShowRoutes] = useState(false);
@@ -57,6 +61,10 @@ const App = ({ match }) => {
               <Route
               path={`${match.url}/actrices`}
               render={(props) => <Actrices {...props} />}
+              />
+              <Route
+                path={`${match.url}/upload`}
+                render={(props) => <Upload {...props} />}
               />
               
               {/* if no route is matched, go to error.  */}
