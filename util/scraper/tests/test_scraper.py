@@ -1,12 +1,11 @@
 import json
+
 import pytest
 
+from indexer.indexer import build_url, extract_film_id
 from util.scraper.detail_page import *
 from util.scraper.document import *
 from util.scraper.list_page import *
-
-from indexer.indexer import build_url, extract_film_id
-
 
 with open("./util/scraper/tests/answers.json", "r") as f:
     data = json.load(f)
@@ -42,15 +41,18 @@ def test_get_iframe_document():
         assert iframe_document
         url_data["iframe_document"] = iframe_document  # used in future tests
 
+
 def test_get_film_title():
     for _, url_data in data.items():
         assert url_data["document"]
         assert get_film_title(url_data["document"]) == url_data["title"]
 
+
 def test_get_film_duration():
     for _, url_data in data.items():
         assert url_data["document"]
         assert get_film_duration(url_data["document"]) == url_data["duration"]
+
 
 def test_get_film_actresses():
     for _, url_data in data.items():

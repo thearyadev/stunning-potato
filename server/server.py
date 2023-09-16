@@ -11,29 +11,26 @@ import traceback
 from pathlib import Path
 from typing import Any
 from uuid import UUID, uuid4
+
 import docker
 import psutil
 import uvicorn
-from fastapi import APIRouter, FastAPI, Query, Form
+from fastapi import APIRouter, FastAPI, File, Form, Query, UploadFile
 from fastapi.exception_handlers import HTTPException
-from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
+from fastapi.responses import (FileResponse, HTMLResponse, Response,
+                               StreamingResponse)
 from fastapi.staticfiles import StaticFiles
 
 from indexer.indexer import extract_film_id, index
 from util.database.database_access import DatabaseAccess
 from util.models.actress_detail import ActressDetail
-from util.models.film import (
-    Film,
-    FilmIn,
-    FilmNoBytes,
-    FilmNoBytesWithAverage,
-    FilmStateEnum,
-)
+from util.models.film import (Film, FilmIn, FilmNoBytes,
+                              FilmNoBytesWithAverage, FilmStateEnum)
 from util.models.indexed import IndexedNoBytes
 from util.models.queue import QueueIn
 from util.models.rating import Rating, RatingIn
-from fastapi import FastAPI, File, UploadFile
 from util.scraper.detail_page import generate_thumbnail, toTimeDelta
+
 
 def filter_bytes_variables(variables):
     filtered_vars = {}
@@ -533,8 +530,7 @@ class Server:
                 story=0, positions=0, pussy=0, shots=0, boobs=0, face=0, rearview=0
             )
         )
-        
-        
+
         film: Film = self.db.insert_film(
             FilmIn(
                 title=title,
@@ -547,13 +543,12 @@ class Server:
                 thumbnail=thumbnail,
                 poster=poster,
                 rating=rating.uuid,
-                download_progress=100
-
+                download_progress=100,
             )
         )
         with open(Path(os.getenv("DOWNLOAD_PATH")).joinpath(filename), "wb") as f:
             f.write(film_bytes)
 
         logging.info(f"Inserted film {film.uuid} into database using manual upload")
-        
+
         return {"message": "Files uploaded successfully"}

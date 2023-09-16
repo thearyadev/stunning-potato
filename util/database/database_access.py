@@ -1,10 +1,10 @@
 import logging
+import os
 import random
 import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
-import os
 
 import psycopg2
 from beartype import beartype
@@ -12,13 +12,8 @@ from psycopg2 import pool
 from psycopg2.extras import DictCursor, UUID_adapter, register_uuid
 
 from util.models.actress_detail import ActressDetail
-from util.models.film import (
-    Film,
-    FilmIn,
-    FilmNoBytes,
-    FilmNoBytesWithAverage,
-    FilmStateEnum,
-)
+from util.models.film import (Film, FilmIn, FilmNoBytes,
+                              FilmNoBytesWithAverage, FilmStateEnum)
 from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
@@ -617,7 +612,6 @@ class DatabaseAccess:
                     b"this is a poster",
                 ]
 
-
         list_of_porn_actresses = [
             "Scarlet Skies",
             "Aria Banks",
@@ -654,48 +648,45 @@ class DatabaseAccess:
 
         for i in range(count):
             films.append(
-                    self.insert_film(
-                        FilmIn(
-                            title=f"sexy time {i + 1}",
-                            duration=timedelta(seconds=random.randint(500, 5000)),
-                            date_added=date(2022, 4, 22)
-                            + timedelta(
-                                days=random.randint(
-                                    0, (date(2023, 4, 22) - date(2022, 4, 22)).days
-                                )
-                            ),
-                            watched=random.choice([False, True]),
-                            state=random.choice(list(FilmStateEnum)),
-                            thumbnail=random.choice(thumbs),
-                            poster=random.choice(posters),
-                            download_progress=random.randint(0, 100),
-                            filename=f"film_number_{i * random.randint(1, 20)}.mp4",
-                            actresses=random.sample(
-                                list_of_porn_actresses, random.randint(1, 3)
-                            ),
-                            rating=ratings[i].uuid,
-                        )
+                self.insert_film(
+                    FilmIn(
+                        title=f"sexy time {i + 1}",
+                        duration=timedelta(seconds=random.randint(500, 5000)),
+                        date_added=date(2022, 4, 22)
+                        + timedelta(
+                            days=random.randint(
+                                0, (date(2023, 4, 22) - date(2022, 4, 22)).days
+                            )
+                        ),
+                        watched=random.choice([False, True]),
+                        state=random.choice(list(FilmStateEnum)),
+                        thumbnail=random.choice(thumbs),
+                        poster=random.choice(posters),
+                        download_progress=random.randint(0, 100),
+                        filename=f"film_number_{i * random.randint(1, 20)}.mp4",
+                        actresses=random.sample(
+                            list_of_porn_actresses, random.randint(1, 3)
+                        ),
+                        rating=ratings[i].uuid,
                     )
                 )
-
-
-
+            )
 
         for i in range(1, count):
             self.insert_indexed(
-                    IndexedIn(
-                        title=f"Downloadable Film #{i}",
-                        actresses=random.sample(
-                            ["Scarlet Skies", "Aria Banks", "Lily Larimar"],
-                            random.randint(1, 3),
-                        ),
-                        thumbnail=random.choice(thumbs),
-                        poster=random.choice(posters),
-                        url=f"https://hqporner.com/hdporn/{i}.html",
-                        film_id=i,
-                        duration=timedelta(seconds=random.randint(500, 5000)),
-                    )
+                IndexedIn(
+                    title=f"Downloadable Film #{i}",
+                    actresses=random.sample(
+                        ["Scarlet Skies", "Aria Banks", "Lily Larimar"],
+                        random.randint(1, 3),
+                    ),
+                    thumbnail=random.choice(thumbs),
+                    poster=random.choice(posters),
+                    url=f"https://hqporner.com/hdporn/{i}.html",
+                    film_id=i,
+                    duration=timedelta(seconds=random.randint(500, 5000)),
                 )
+            )
 
     def set_film_progress(self, newProgress: int, film_uuid: UUID):
         """Sets the download progress of a film
@@ -853,7 +844,7 @@ class DatabaseAccess:
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT pg_size_pretty(pg_database_size(%s));",
-                (self.db_name, ),
+                (self.db_name,),
             )
             size: int = int("".join([i for i in cursor.fetchone()[0] if i.isdigit()]))
         self.connection_pool.putconn(connection)

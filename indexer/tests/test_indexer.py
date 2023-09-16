@@ -1,6 +1,8 @@
-from indexer.indexer import build_url, extract_film_id
 import pytest
 from beartype.roar import BeartypeCallHintParamViolation
+
+from indexer.indexer import build_url, extract_film_id
+
 
 def test_build_url():
     assert build_url(123) == "https://hqporner.com/hdporn/123.html"
@@ -8,6 +10,7 @@ def test_build_url():
     assert build_url(0) == "https://hqporner.com/hdporn/0.html"
     assert build_url(987654321) == "https://hqporner.com/hdporn/987654321.html"
     assert build_url(-987654321) == "https://hqporner.com/hdporn/-987654321.html"
+
 
 def test_extract_film_id():
     # Test with a simple URL
@@ -24,5 +27,5 @@ def test_extract_film_id():
 
     with pytest.raises(BeartypeCallHintParamViolation):
         extract_film_id(12)
-    
+
     assert extract_film_id("https://funstuff.com/hdfun/askdljsad123zzas.html") == 123

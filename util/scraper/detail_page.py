@@ -16,7 +16,6 @@ IFRAME_BLACKLIST: list[str] = json.loads(
 ).get("blacklist")
 
 
-
 def toTimeDelta(time_text: str) -> timedelta:
     """Convert string to timedelta
 
@@ -37,6 +36,7 @@ def toTimeDelta(time_text: str) -> timedelta:
             case "s":
                 delta += timedelta(seconds=int(component[:-1]))
     return delta
+
 
 @beartype
 def parse_url(url: str) -> str:
@@ -96,7 +96,6 @@ def get_film_duration(document: BeautifulSoup) -> timedelta:
         timedelta: film duration
     """
     return toTimeDelta(document.find("li", class_="fa-clock-o").text)
-
 
 
 @beartype

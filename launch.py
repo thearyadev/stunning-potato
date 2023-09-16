@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 from downloader.downloader import Downloader
 from indexer.indexer import Indexer
 from server.server import Server
+from transcoder.transcoder import Transcoder
 from util.database.database_access import DatabaseAccess
 
 
@@ -51,7 +52,10 @@ parser.add_argument(
     help="logging level: INFO, DEBUG, WARNING, ERROR, CRITICAL",
 )
 parser.add_argument(
-    "--app", type=str, help="app name", choices=["server", "downloader", "indexer"]
+    "--app",
+    type=str,
+    help="app name",
+    choices=["server", "downloader", "indexer", "transcoder"],
 )
 parser.add_argument("--flush", type=str, help="flush database", default="False")
 args = parser.parse_args()
@@ -82,6 +86,9 @@ if __name__ == "__main__":
                 Downloader(databaseAccess=db).main_loop()
             case "indexer":
                 Indexer(databaseAccess=db).main_loop()
+            case "transcoder":
+                Transcoder(databaseAccess=db).main_loop()
+
     except Exception as e:
         _, _, tb = sys.exc_info()
         line_number = traceback.extract_tb(tb)[-1][1]

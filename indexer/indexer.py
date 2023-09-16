@@ -8,15 +8,10 @@ from rich import print
 
 from util.database.database_access import DatabaseAccess
 from util.models.indexed import IndexedIn
-from util.scraper.detail_page import (
-    generate_thumbnail,
-    get_download_url,
-    get_film_actresses,
-    get_film_duration,
-    get_film_title,
-    get_iframe_source,
-    get_poster,
-)
+from util.scraper.detail_page import (generate_thumbnail, get_download_url,
+                                      get_film_actresses, get_film_duration,
+                                      get_film_title, get_iframe_source,
+                                      get_poster)
 from util.scraper.document import get_document
 from util.scraper.list_page import collect_urls
 
