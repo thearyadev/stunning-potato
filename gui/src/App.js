@@ -46,7 +46,7 @@ class App extends React.Component {
     FetchActresses();
     FetchFilms();
     const intervalId = setInterval(async () => {
-      if (document.hasFocus() && !document.location.pathname.includes("cinema")) {
+      if (document.hasFocus() && document.location.pathname === "/foutre/cinema/cin%C3%A9math%C3%A8que") {
         FetchActresses();
         FetchFilms();
       }
