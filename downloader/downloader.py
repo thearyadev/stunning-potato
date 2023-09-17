@@ -26,10 +26,6 @@ class Downloader:
         self.last_reported_progress = None
 
     def main_loop(self):
-        class a:
-            filename = "2d07c45c5ab44eac8d737b471c163e79.mp4"
-
-        self.transcode(film=a())
         while True:
             queue_item: Queue = self.db.get_and_pop_queue()  # get and pop from queue
             if queue_item is not None:
@@ -107,11 +103,15 @@ class Downloader:
         model = whisper.load_model("tiny")
         target_path: Path = Path(os.getenv("DOWNLOAD_PATH")).joinpath(film.filename)
         output_path: Path = (
-            Path(os.getenv("DOWNLOAD_PATH")).joinpath(film.filename).with_suffix(".vtt")
+            Path(os.getenv("SUBTITLES_PATH"))
+            .joinpath(film.filename)
+            .with_suffix(".vtt")
         )
         logging.info(f"Transcribing {target_path} to {output_path}")
         try:
-            result = model.transcribe(target_path, initial_prompt="porn, sex, moan")
+            result = model.transcribe(
+                str(target_path), initial_prompt="porn, sex, moan"
+            )
             with output_path.open("w") as vtt_file:
                 WriteVTT(".").write_result(result, vtt_file)
         except Exception as e:
