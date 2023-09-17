@@ -46,8 +46,8 @@ services:
     networks:
       lewdlocale:
     deploy:
-      replicas: 5
-      
+      replicas: 3
+
   postgres:
     image: postgres:15.3-alpine
     env_file:
