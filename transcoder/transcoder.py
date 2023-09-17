@@ -5,6 +5,16 @@ from util.database.database_access import DatabaseAccess
 
 
 @beartype
+def encode() -> None:
+    ...
+
+
+@beartype
+def transcribe() -> None:
+    ...
+
+
+@beartype
 class Transcoder:
     def __init__(
         self,
