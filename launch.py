@@ -55,7 +55,7 @@ parser.add_argument(
     "--app",
     type=str,
     help="app name",
-    choices=["server", "downloader", "indexer", "transcoder"],
+    choices=["server", "downloader", "indexer"],
 )
 parser.add_argument("--flush", type=str, help="flush database", default="False")
 args = parser.parse_args()
@@ -74,7 +74,7 @@ db = DatabaseAccess(
 if args.flush == "True":
     db.drop()
     db.initialize(Path("./util/database/tables.sql"))
-    db.populate_demo_data()
+    # db.populate_demo_data()
 
 if __name__ == "__main__":
     try:
@@ -86,8 +86,6 @@ if __name__ == "__main__":
                 Downloader(databaseAccess=db).main_loop()
             case "indexer":
                 Indexer(databaseAccess=db).main_loop()
-            case "transcoder":
-                Transcoder(databaseAccess=db).main_loop()
 
     except Exception as e:
         _, _, tb = sys.exc_info()
