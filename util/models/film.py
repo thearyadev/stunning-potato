@@ -7,6 +7,7 @@ from uuid import UUID
 class FilmStateEnum(str, Enum):
     DOWNLOADING = "DOWNLOADING"
     IN_QUEUE = "IN QUEUE"
+    TRANSCODING = "TRANSCODING"
     COMPLETE = "COMPLETE"
 
 
