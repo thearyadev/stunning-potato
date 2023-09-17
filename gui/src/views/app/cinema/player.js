@@ -13,10 +13,11 @@ import { useState, useEffect } from 'react';
 import { SliderTooltip, RangeTooltip } from 'components/common/SliderTooltips';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 
-const Video = ({ poster, video }) => {
+const Video = ({ poster, video, subtitles }) => {
   return (
     <video poster={poster} controls className='card-img-top'>
       <source src={video} type="video/mp4" />
+      <track src={subtitles} kind="subtitles" srcLang='en' label='English' />
       Your browser does not support the video tag.
     </video>
   )
@@ -119,6 +120,7 @@ const Player = ({ match, uuid }) => {
           <Video
             poster={`/api/poster?uuid=${film.uuid}`}
             video={`/api/v?uuid=${film.uuid}`}
+            subtitles={`/api/vtt?uuid=${film.uuid}`}
           />
           <CardBody>
             <div className="d-flex justify-content-between">
