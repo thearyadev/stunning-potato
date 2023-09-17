@@ -19,7 +19,6 @@ from dotenv import load_dotenv
 from downloader.downloader import Downloader
 from indexer.indexer import Indexer
 from server.server import Server
-from transcoder.transcoder import Transcoder
 from util.database.database_access import DatabaseAccess
 
 
