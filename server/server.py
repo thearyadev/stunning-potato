@@ -282,8 +282,16 @@ class Server:
         full_file_to_delete: Path = Path(os.getenv("DOWNLOAD_PATH")).joinpath(
             film.filename
         )
+        vtt_to_delete: Path = (
+            Path(os.getenv("SUBTITLES_PATH"))
+            .joinpath(film.filename)
+            .with_suffix(".vtt")
+        )
         if os.path.isfile(full_file_to_delete):
             os.remove(full_file_to_delete)
+
+        if os.path.isfile(vtt_to_delete):
+            os.remove(vtt_to_delete)
         self.db.delete_film(film.uuid)
         return Response(status_code=200)
 
