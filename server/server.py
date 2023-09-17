@@ -103,6 +103,7 @@ class Server:
             "/storage", self.get_available_storage, methods=["GET"]
         )
         self.router.add_api_route("/v", self.serve_video, methods=["GET"])
+        self.router.add_api_route("/vtt", self.get_vtt, methods=["GET"])
         self.router.add_api_route("/queue_add", self.add_to_queue, methods=["POST"])
         self.router.add_api_route("/containers", self.container_data, methods=["GET"])
 
@@ -552,3 +553,23 @@ class Server:
         logging.info(f"Inserted film {film.uuid} into database using manual upload")
 
         return {"message": "Files uploaded successfully"}
+
+    def get_vtt(self, uuid: UUID = Query(...)) -> FileResponse:
+        """Returns a vtt file for a given film
+
+        Returns:
+            FileResponse: vtt file
+        """
+        vtt_path = (
+            Path(os.getenv("SUBTITLES_PATH"))
+            .joinpath(self.db.get_film(uuid).filename)
+            .with_suffix(".vtt")
+        )
+        if not vtt_path.exists():
+            return Response(status_code=404)
+
+        response = FileResponse(
+            vtt_path,
+            media_type="text/vtt",
+        )
+        return response
