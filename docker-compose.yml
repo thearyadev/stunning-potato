@@ -47,24 +47,7 @@ services:
       lewdlocale:
     deploy:
       replicas: 5
-
-  transcoder:
-    build:
-      context: .
-      dockerfile: ./transcoder/Dockerfile
-    env_file:
-      - docker.env
-    depends_on:
-      - postgres
-    volumes:
-      - /remote/xxx/films:/lewdlocale/films
-      - /remote/xxx/errors:/lewdlocale/errors
-    networks:
-      lewdlocale:
-    restart: on-failure:3
-
-    
-
+      
   postgres:
     image: postgres:15.3-alpine
     env_file:
