@@ -13,6 +13,11 @@ from util.models.film import Film, FilmStateEnum
 from util.models.queue import Queue
 from util.scraper.detail_page import get_download_url, get_iframe_source
 from util.scraper.document import get_document
+import ffmpeg
+import os
+import whisper
+
+os.environ["XDG_CACHE_HOME"] = "./.cache"
 
 
 @beartype
@@ -38,11 +43,59 @@ class Downloader:
                     ),
                     film,
                 )  # begin downloading
-                # complete download
+                self.db.set_film_state(
+                    queue_item.film_uuid, new_state=FilmStateEnum.TRANSCODING
+                )
+                self.transcode(film)  # transcode
+
+                # complete process
                 self.db.set_film_state(
                     queue_item.film_uuid, new_state=FilmStateEnum.COMPLETE
                 )  # set_state to COMPLETE
             time.sleep(5)
+
+    def transcode(self, film: Film) -> None:
+        """
+        Transcodes a film from the given path to the given path.
+
+        Args:
+            film (Film): The Film object representing the file to transcode.
+
+        Returns:
+            None
+        """
+        target_path: Path = Path(os.getenv("DOWNLOAD_PATH")).joinpath(film.filename)
+        output_path: Path = Path(os.getenv("DOWNLOAD_PATH")).joinpath(
+            f"{film.uuid}.mp4.transcoding"
+        )
+        logging.info(f"Transcoding {target_path} to {output_path}")
+        ffmpeg.input(target_path).output(
+            str(output_path),
+            vcodec="libx264",
+            video_bitrate="1750k",
+            acodec="aac",
+            strict="experimental",
+            ab="192k",
+            movflags="faststart",
+            metadata={
+                "LEWDLOCALE_TRANSCODE": "True",
+            },
+        ).run()
+        target_path.unlink()
+        output_path.rename(target_path)
+        return
+
+    def transcribe(self, film: Film) -> None:
+        """
+        Transcribes a film from the given path to the given path.
+
+        Args:
+            film (Film): The Film object representing the file to transcribe.
+
+        Returns:
+            None
+        """
+        ...
 
     def download(self, url: str, film: Film) -> None:
         """
