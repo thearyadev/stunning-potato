@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 DO $$ 
 BEGIN 
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'film_state') THEN 
-        CREATE TYPE film_state AS ENUM ('DOWNLOADING', 'IN QUEUE', 'TRANSCODING', 'COMPLETE'); 
+        CREATE TYPE film_state AS ENUM ('DOWNLOADING', 'IN QUEUE', 'TRANSCODING', 'TRANSCRIBING', 'COMPLETE');
     END IF; 
 END $$;
 
