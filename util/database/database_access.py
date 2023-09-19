@@ -69,7 +69,7 @@ class DatabaseAccess:
 
         logging.info("Connected to database")
 
-    def initialize(self, sql_path: Path):
+    def initialize(self, sql_path: Path) -> None:
         """Creates all the tables as defined in a .sql file
 
         Args:

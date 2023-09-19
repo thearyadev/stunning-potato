@@ -27,6 +27,6 @@ class ActressDetail:
                 self.boobs,
                 self.face,
                 self.rearview,
-                self.filmCount,
+                self.film_count,
             )
         )

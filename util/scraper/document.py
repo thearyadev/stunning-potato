@@ -19,7 +19,9 @@ def get_document(url: str) -> BeautifulSoup:
     response.raise_for_status()
     document = BeautifulSoup(response.text, "html.parser")
     try:
-        logging.info(f"Got document from {url}. Title is <{document.title.text}>")
+        logging.info(f"Got document from {url}. Title is <{document.title.text}>") # type: ignore
+        # title may not have .text. Ignore for mypy
+        # exception is caught
     except AttributeError:
         pass
     return document
