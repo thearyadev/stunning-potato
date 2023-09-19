@@ -65,7 +65,8 @@ def get_film_title(document: BeautifulSoup) -> str:
     Returns:
         str: film title
     """
-    return document.find("h1", class_="main-h1").text.title().strip()
+    # exceptions should be raised here if the h1 is none.
+    return document.find("h1", class_="main-h1").text.title().strip() # type: ignore
 
 
 @beartype
@@ -79,7 +80,8 @@ def get_film_actresses(document: BeautifulSoup) -> list[str]:
         list[str]:  actresses
     """
     actresses: list[str] = [
-        a.text for a in document.find("li", class_="fa-star-o").find_all("a")
+        # exception should be raised here if the find returns None
+        a.text for a in document.find("li", class_="fa-star-o").find_all("a") # type: ignore
     ]
     logging.info(f"Parsed Film Actresses {actresses}")
     return actresses
@@ -95,7 +97,8 @@ def get_film_duration(document: BeautifulSoup) -> timedelta:
     Returns:
         timedelta: film duration
     """
-    return toTimeDelta(document.find("li", class_="fa-clock-o").text)
+    # exception should be raised if find returns None
+    return toTimeDelta(document.find("li", class_="fa-clock-o").text) # type: ignore
 
 
 @beartype
