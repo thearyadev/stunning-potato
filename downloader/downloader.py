@@ -17,7 +17,7 @@ from util.models.queue import Queue
 from util.scraper.detail_page import get_download_url, get_iframe_source
 from util.scraper.document import get_document
 
-NTFY_TARGET_URI = "https://n2.aryankothari.dev"
+NTFY_TARGET_URI = "https://n2.aryankothari.dev/lewdlocale"
 
 
 def send_notification(message: str) -> None:
