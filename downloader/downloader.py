@@ -17,6 +17,24 @@ from util.models.queue import Queue
 from util.scraper.detail_page import get_download_url, get_iframe_source
 from util.scraper.document import get_document
 
+NTFY_TARGET_URI = "https://n2.aryankothari.dev"
+
+
+def send_notification(message: str) -> None:
+    """
+    Sends a notification to the user.
+
+    Args:
+        message (str): The message to send.
+
+    Returns:
+        None
+    """
+    try:
+        requests.post(NTFY_TARGET_URI, data=message)
+    except Exception as e:
+        logging.error("Unable to send message to NTFY")
+
 
 # @beartype
 class Downloader:
@@ -35,17 +53,26 @@ class Downloader:
                 self.db.set_film_state(
                     film.uuid, new_state=FilmStateEnum.DOWNLOADING
                 )  # set_state to DOWNLOADING
+                send_notification(f"Download started for {film.title}")
                 self.download(
                     get_download_url(
                         get_document(get_iframe_source(get_document(queue_item.url)))
                     ),
                     film,
                 )  # begin downloading
+                send_notification(f"Download completed for {film.title}")
+
                 self.db.set_film_state(
                     queue_item.film_uuid, new_state=FilmStateEnum.TRANSCODING
                 )
+                send_notification(f"Transcode started for {film.title}")
+
                 self.transcode(film)  # transcode
+                send_notification(f"Transcode completed for {film.title}")
+
+                send_notification("Transcribe started for {film.title}")
                 self.transcribe(film)  # transcribe
+                send_notification(f"Transcribe completed for {film.title}")
                 # complete process
                 self.db.set_film_state(
                     queue_item.film_uuid, new_state=FilmStateEnum.COMPLETE
