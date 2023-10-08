@@ -98,7 +98,7 @@ class Downloader:
             ffmpeg.input(target_path).output(
                 str(output_path),
                 vcodec="libx264",
-                video_bitrate="1750k",
+                video_bitrate="2000k",
                 acodec="aac",
                 strict="experimental",
                 ab="192k",
