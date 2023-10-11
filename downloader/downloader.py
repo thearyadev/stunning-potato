@@ -70,9 +70,9 @@ class Downloader:
                 self.transcode(film)  # transcode
                 send_notification(f"Transcode completed for {film.title}")
 
-                send_notification("Transcribe started for {film.title}")
-                self.transcribe(film)  # transcribe
-                send_notification(f"Transcribe completed for {film.title}")
+                # send_notification("Transcribe started for {film.title}")
+                # self.transcribe(film)  # transcribe
+                # send_notification(f"Transcribe completed for {film.title}")
                 # complete process
                 self.db.set_film_state(
                     queue_item.film_uuid, new_state=FilmStateEnum.COMPLETE
