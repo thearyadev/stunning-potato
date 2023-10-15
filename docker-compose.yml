@@ -49,7 +49,12 @@ services:
       lewdlocale:
     deploy:
       replicas: 3
-
+      resources:
+          reservations:
+             devices:
+              - driver: nvidia
+                count: 1
+                capabilities: [gpu]
   postgres:
     image: postgres:15.3-alpine
     env_file:
