@@ -97,13 +97,12 @@ class Downloader:
         try:
             ffmpeg.input(target_path).output(
                 str(output_path),
-                vcodec="libx264",
+                vcodec="h264_nvenc",
                 video_bitrate="2000k",
                 acodec="aac",
                 strict="experimental",
                 ab="192k",
                 movflags="faststart",
-                threads=1,
             ).run()
 
         except Exception as e:
