@@ -57,7 +57,7 @@ services:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [ gpu, video ]
+              capabilities: [ gpu ]
 
   postgres:
     image: postgres:15.3-alpine
