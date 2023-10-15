@@ -7,11 +7,12 @@ WORKDIR /lewdlocale
 # Copy current directory contents into the container at /lewdlocale
 COPY . .
 
+RUN apt-get update
 # Install pip for Python 3
 RUN apt-get install -y python3.11
-
-# Install poetry
-RUN pip install poetry==1.3.2
+RUN apt-get install -y python3-pip
+# Install poetryi
+RUN python3.11 -m pip install poetry==1.3.2
 
 # Install dependencies using poetry
 RUN poetry install
