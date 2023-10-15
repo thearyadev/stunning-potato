@@ -48,6 +48,8 @@ services:
       - /mnt/skies/media/xxx/subtitles:/lewdlocale/subtitles
     networks:
       lewdlocale:
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=all
     deploy:
       replicas: 2
       resources:
