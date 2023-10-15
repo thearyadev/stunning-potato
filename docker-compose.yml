@@ -1,3 +1,4 @@
+
 version: "3.9"
 services:
   server:
@@ -11,14 +12,14 @@ services:
     ports:
       - "8080:8000"
     volumes:
-      - /remote/xxx/films:/lewdlocale/films
-      - /remote/xxx/errors:/lewdlocale/errors
-      - /remote/xxx/subtitles:/lewdlocale/subtitles
+      - /mnt/skies/media/xxx/films:/lewdlocale/films
+      - /mnt/skies/media/xxx/errors:/lewdlocale/errors
+      - /mnt/skies/media/xxx/subtitles:/lewdlocale/subtitles
       - /var/run/docker.sock:/var/run/docker.sock # to track other containers
     networks:
       lewdlocale:
     restart: on-failure:3
-  
+
   indexer:
     build:
       context: .
@@ -28,11 +29,11 @@ services:
     depends_on:
       - postgres
     volumes:
-      - /remote/xxx/errors:/lewdlocale/errors
+      - /mnt/skies/media/xxx/errors:/lewdlocale/errors
     networks:
       lewdlocale:
     restart: on-failure:3
-    
+
   downloader:
     build:
       context: .
@@ -42,38 +43,40 @@ services:
     depends_on:
       - postgres
     volumes:
-      - /remote/xxx/films:/lewdlocale/films
-      - /remote/xxx/errors:/lewdlocale/errors
-      - /remote/xxx/subtitles:/lewdlocale/subtitles
+      - /mnt/skies/media/xxx/films:/lewdlocale/films
+      - /mnt/skies/media/xxx/errors:/lewdlocale/errors
+      - /mnt/skies/media/xxx/subtitles:/lewdlocale/subtitles
     networks:
       lewdlocale:
     deploy:
-      replicas: 3
+      replicas: 2
       resources:
-          reservations:
-             devices:
-              - driver: nvidia
-                count: 1
-                capabilities: [gpu]
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 0
+              capabilities: [ gpu ]
+
   postgres:
     image: postgres:15.3-alpine
     env_file:
       - docker.env
+
     volumes:
-      - /remote/xxx/database:/var/lib/postgresql/data # replace with on-system path
+      - /mnt/skies/media/xxx/database:/var/lib/postgresql/data # replace with on-system path
     ports:
       - "5433:5432" # for external access
     restart: on-failure:3
     hostname: postgres
     networks:
       lewdlocale:
-    user: "3002:1000"
+    user: "3000:1000"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lewdlocale"]
       interval: 10s
       timeout: 5s
       retries: 5
-  
+
 networks:
   lewdlocale:
     driver: bridge
