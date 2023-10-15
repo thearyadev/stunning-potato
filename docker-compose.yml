@@ -54,7 +54,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 0
+              count: 1
               capabilities: [ gpu ]
 
   postgres:
