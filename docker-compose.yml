@@ -51,7 +51,7 @@ services:
     environment:
       - NVIDIA_DRIVER_CAPABILITIES=all
     deploy:
-      replicas: 2
+      replicas: 4
       resources:
         reservations:
           devices:
