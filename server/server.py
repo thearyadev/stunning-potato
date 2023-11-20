@@ -17,15 +17,19 @@ import psutil
 import uvicorn
 from fastapi import APIRouter, FastAPI, File, Form, Query, UploadFile
 from fastapi.exception_handlers import HTTPException
-from fastapi.responses import (FileResponse, HTMLResponse, Response,
-                               StreamingResponse)
+from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from indexer.indexer import extract_film_id, index
 from util.database.database_access import DatabaseAccess
 from util.models.actress_detail import ActressDetail
-from util.models.film import (Film, FilmIn, FilmNoBytes,
-                              FilmNoBytesWithAverage, FilmStateEnum)
+from util.models.film import (
+    Film,
+    FilmIn,
+    FilmNoBytes,
+    FilmNoBytesWithAverage,
+    FilmStateEnum,
+)
 from util.models.indexed import IndexedNoBytes
 from util.models.queue import QueueIn
 from util.models.rating import Rating, RatingIn

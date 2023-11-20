@@ -12,8 +12,13 @@ from psycopg2 import pool
 from psycopg2.extras import DictCursor, UUID_adapter, register_uuid
 
 from util.models.actress_detail import ActressDetail
-from util.models.film import (Film, FilmIn, FilmNoBytes,
-                              FilmNoBytesWithAverage, FilmStateEnum)
+from util.models.film import (
+    Film,
+    FilmIn,
+    FilmNoBytes,
+    FilmNoBytesWithAverage,
+    FilmStateEnum,
+)
 from util.models.indexed import Indexed, IndexedIn, IndexedNoBytes
 from util.models.queue import Queue, QueueIn
 from util.models.rating import Rating, RatingIn
