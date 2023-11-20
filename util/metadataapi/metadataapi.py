@@ -1,8 +1,9 @@
 import requests
 import dataclasses
 from typing import Any
-from PIL import Image
 from rich import print
+from dotenv import load_dotenv
+import os
 
 
 @dataclasses.dataclass
@@ -13,9 +14,7 @@ class TpdbFilmData:
     poster: bytes
 
 
-# remove
-
-token = "Efv3blLRfMRCh5kN4Z1zczqR9hWRcEJfP4b7cfsu896df184"
+load_dotenv()
 
 
 def get_film_data(tpdb_scene_id: str) -> TpdbFilmData:
@@ -25,7 +24,7 @@ def get_film_data(tpdb_scene_id: str) -> TpdbFilmData:
     """
     r = requests.get(
         f"https://api.metadataapi.net/scenes/{tpdb_scene_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {os.environ.get('TPDB_API_TOKEN')}"},
     )
     if r.status_code == requests.status_codes.codes.NOT_FOUND:
         raise ValueError(f"Scene not found.")
@@ -66,7 +65,8 @@ def get_actresses(data: dict[str, Any]) -> list[str]:
             _o.append(actress['name'])
             continue
 
-        if actress['parent']['extras']['gender'] is not None and actress['parent']['extras']['gender'].lower() != "male":
+        if actress['parent']['extras']['gender'] is not None and actress['parent']['extras'][
+            'gender'].lower() != "male":
             _o.append(actress['name'])
 
     return _o
