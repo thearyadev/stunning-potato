@@ -61,13 +61,18 @@ def get_image(url: str) -> bytes:
 def get_actresses(data: dict[str, Any]) -> list[str]:
     _o = list()
     for actress in data["performers"]:
-        if actress['extra']['gender'] is not None and actress['extra']['gender'].lower() != "male":
-            _o.append(actress['name'])
+        if (
+            actress["extra"]["gender"] is not None
+            and actress["extra"]["gender"].lower() != "male"
+        ):
+            _o.append(actress["name"])
             continue
 
-        if actress['parent']['extras']['gender'] is not None and actress['parent']['extras'][
-            'gender'].lower() != "male":
-            _o.append(actress['name'])
+        if (
+            actress["parent"]["extras"]["gender"] is not None
+            and actress["parent"]["extras"]["gender"].lower() != "male"
+        ):
+            _o.append(actress["name"])
 
     return _o
 
@@ -78,7 +83,7 @@ def test() -> None:
     cases = [
         ("72b28b93-ce6c-4b45-94c2-780e0813f948", 2),
         ("4d05764f-03df-4056-9e7a-3612fa83e533", 1),
-        ("0100bc74-90b5-47b0-b5f4-ff0517302068", 2)
+        ("0100bc74-90b5-47b0-b5f4-ff0517302068", 2),
     ]
     for case in cases:
         o = get_film_data(case[0])
