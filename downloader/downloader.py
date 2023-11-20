@@ -7,9 +7,7 @@ from uuid import UUID
 
 import ffmpeg
 import requests
-import whisper
 from beartype import beartype
-from whisper.utils import WriteVTT
 
 from util.database.database_access import DatabaseAccess
 from util.models.film import Film, FilmStateEnum
@@ -113,39 +111,6 @@ class Downloader:
         logging.info(f"Transcoding complete for {target_path}")
         target_path.unlink()
         output_path.rename(target_path)
-        return True
-
-    def transcribe(self, film: Film) -> bool:
-        """
-        Transcribes a film from the given path to the given path.
-
-        Args:
-            film (Film): The Film object representing the file to transcribe.
-
-        Returns:
-            None
-        """
-        os.environ["XDG_CACHE_HOME"] = "./.cache"
-        model = whisper.load_model("tiny")
-        target_path: Path = Path(os.getenv("DOWNLOAD_PATH")).joinpath(film.filename)
-        output_path: Path = (
-            Path(os.getenv("SUBTITLES_PATH"))
-            .joinpath(film.filename)
-            .with_suffix(".vtt")
-        )
-        logging.info(f"Transcribing {target_path} to {output_path}")
-        try:
-            result = model.transcribe(
-                str(target_path), initial_prompt="porn, sex, moan"
-            )
-            with output_path.open("w") as vtt_file:
-                WriteVTT(".").write_result(result, vtt_file)
-        except Exception as e:
-            logging.error(f"Transcribing failed for {target_path}")
-            logging.error(e)
-            if output_path.exists():
-                output_path.unlink()
-            return False
         return True
 
     def download(self, url: str, film: Film) -> None:
