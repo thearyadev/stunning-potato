@@ -1157,6 +1157,20 @@ files = [
 dev = ["atomicwrites (==1.2.1)", "attrs (==19.2.0)", "coverage (==6.5.0)", "hatch", "invoke (==1.7.3)", "more-itertools (==4.3.0)", "pbr (==4.3.0)", "pluggy (==1.0.0)", "py (==1.11.0)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-timeout (==2.1.0)", "pyyaml (==5.1)"]
 
 [[package]]
+name = "python-qbittorrent"
+version = "0.4.3"
+description = "Python wrapper for qBittorrent >4.1.x"
+optional = false
+python-versions = "*"
+files = [
+    {file = "python-qbittorrent-0.4.3.tar.gz", hash = "sha256:4e22cf89890628b054a60aa4bd1161a68c2b0fad48ef0886fa4d325e69d3828a"},
+    {file = "python_qbittorrent-0.4.3-py3-none-any.whl", hash = "sha256:dc2583226b69916ab96735537abd7696acc52e02e2d4d7afd10fa976f10d3aaa"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[[package]]
 name = "pywin32"
 version = "306"
 description = "Python for Window Extensions"
@@ -1328,20 +1342,6 @@ anyio = ">=3.4.0,<5"
 full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyaml"]
 
 [[package]]
-name = "torrentool"
-version = "1.2.0"
-description = "The tool to work with torrent files."
-optional = false
-python-versions = "*"
-files = [
-    {file = "torrentool-1.2.0-py3-none-any.whl", hash = "sha256:bc6c55622e23978cf3c1e4aaf8f087971d75608c15b83be5a2c029464d3dd803"},
-    {file = "torrentool-1.2.0.tar.gz", hash = "sha256:72cdd049eaf856ddc907d1d61527764ef0288512087d93a49267e00c4033c429"},
-]
-
-[package.extras]
-cli = ["click"]
-
-[[package]]
 name = "typing-extensions"
 version = "4.8.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -1405,4 +1405,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "2491eb06c3e4c4dfce3504716533f73b020f9a789f42ce20bdf5f1a9a534f0d8"
+content-hash = "a52b2b62ac9bfa64ea8457236e249afddbca040b962382c131fdaa4e04549de2"

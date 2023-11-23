@@ -26,7 +26,7 @@ pytest = "^7.3.1"
 pytest-order = "^1.1.0"
 python-multipart = "^0.0.6"
 ffmpeg-python = "^0.2.0"
-torrentool = "^1.2.0"
+python-qbittorrent = "^0.4.3"
 
     
 [build-system]
