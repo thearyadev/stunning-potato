@@ -2,7 +2,6 @@ import requests
 import dataclasses
 from typing import Any
 from rich import print
-from dotenv import load_dotenv
 import os
 
 
@@ -12,9 +11,6 @@ class TpdbFilmData:
     actresses: list[str]
     thumbnail: bytes
     poster: bytes
-
-
-load_dotenv()
 
 
 def get_film_data(tpdb_scene_id: str) -> TpdbFilmData:
@@ -62,15 +58,15 @@ def get_actresses(data: dict[str, Any]) -> list[str]:
     _o = list()
     for actress in data["performers"]:
         if (
-            actress["extra"]["gender"] is not None
-            and actress["extra"]["gender"].lower() != "male"
+                actress["extra"]["gender"] is not None
+                and actress["extra"]["gender"].lower() != "male"
         ):
             _o.append(actress["name"])
             continue
 
         if (
-            actress["parent"]["extras"]["gender"] is not None
-            and actress["parent"]["extras"]["gender"].lower() != "male"
+                actress["parent"]["extras"]["gender"] is not None
+                and actress["parent"]["extras"]["gender"].lower() != "male"
         ):
             _o.append(actress["name"])
 
