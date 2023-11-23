@@ -58,15 +58,15 @@ def get_actresses(data: dict[str, Any]) -> list[str]:
     _o = list()
     for actress in data["performers"]:
         if (
-                actress["extra"]["gender"] is not None
-                and actress["extra"]["gender"].lower() != "male"
+            actress["extra"]["gender"] is not None
+            and actress["extra"]["gender"].lower() != "male"
         ):
             _o.append(actress["name"])
             continue
 
         if (
-                actress["parent"]["extras"]["gender"] is not None
-                and actress["parent"]["extras"]["gender"].lower() != "male"
+            actress["parent"]["extras"]["gender"] is not None
+            and actress["parent"]["extras"]["gender"].lower() != "male"
         ):
             _o.append(actress["name"])
 
